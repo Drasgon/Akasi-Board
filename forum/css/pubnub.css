@@ -1,0 +1,114 @@
+/*
+	Written by Ian Tanthal - Only for family purposes
+*/
+
+@import url(http://fonts.googleapis.com/css?family=Arimo);
+
+body {
+background: #CCC;
+color: #333;
+position: absolute;
+width: 400px;
+height: 600px;
+text-align:center;
+top:50%;
+left:50%;
+margin-top:-300px;
+margin-left:-200px;
+
+font-size:.95em;
+font-family: 'Arimo', sans-serif;
+}
+
+.page {
+	box-shadow: 0 0 200px #695F5F;
+	border-radius: 15px 15px 0 0;
+}
+
+.chatOverlay {
+	position:absolute;
+	background-color: rgba(67, 139, 167, 0.45);
+	width:110%;
+	height:110%;
+	z-index:100;
+	top:-5%;
+	left:-5%;
+	border-radius:10px;
+}
+
+.chatOverlay form {
+	margin-top:70%;
+}
+
+.chatHeader {
+	border-radius: 15px 15px 0 0;
+	padding:10px;
+	background-color: #F8F8F8;
+	box-shadow: 0 5px 5px #9B9898;
+	min-height:50px;
+	max-height:100px;
+}
+
+.chatHeader:after {
+	clear:both;
+	display:block;
+	content:'';
+}
+
+.chatHeader_left {
+	float:left;
+	font-weight:bold;
+	font-size:1.2em;
+}
+
+.chatHeader_right {
+	float:right;
+}
+
+.onlineUsers {
+	margin:0;
+	font-weight:bold;
+}
+
+.chatSection {
+	height:500px;
+	width:400px;
+	background-color: #E9EAED;
+	border-radius:0 0 20px 20px;
+	overflow-y: scroll;
+	position:relative;
+}
+
+.chatRow {
+	position:relative;
+	float:left;
+	width:90%;
+	height:auto;
+	margin: 15px 0 0 20px;
+	padding: 10px 10px 10px 0;
+	text-align:left;
+	position:relative;
+	display:inline-block;
+}
+
+.chatRow_user {
+	word-wrap: normal;
+	font-weight:bold;
+}
+
+.chatRow_inner {
+	width:70%;
+	min-height:30px;
+	border-radius:15px;
+	background-color:#DDD;
+	margin: 10px 0 0 55px;
+	padding:10px;
+	text-align:left;
+	display:inline-block;
+	box-shadow: 2px 2px 5px #9E9E9E;
+	border: 1px solid #B9B9B9;
+}
+
+.chatRow:last-child {
+	margin-bottom:15px;
+}

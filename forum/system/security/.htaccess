@@ -1,0 +1,43 @@
+# Disable directories listing in browser
+Options -Indexes
+#ErrorDocument 403 /error.php?code=403
+#ErrorDocument 404 /error.php?code=404
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$  /$1.php [QSA,L]
+<IfModule mod_rewrite.c>
+        RewriteEngine On
+
+        # Removes index.php from ExpressionEngine URLs
+        RewriteCond $1 !\.(gif|jpe?g|png)$ [NC]
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule ^(.*)$ /index.php/$1 [L]
+	RewriteRule ^(.*)/index\.php$  $1\.php
+</IfModule>
+php_flag display_errors off
+
+<files get_user_data.php>
+Order deny,allow
+deny from all
+</files>
+
+<files auth.php>
+Order deny,allow
+deny from all
+</files>
+
+<files login_function.php>
+Order deny,allow
+deny from all
+</files>
+
+<files function.php>
+Order deny,allow
+deny from all
+</files>
+
+php_flag register_globals 0
