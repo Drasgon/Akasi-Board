@@ -1,0 +1,28 @@
+@media screen and (max-width: 1200px) {
+    .main_header_content .desktop_nav {
+        display:none!important;
+    }
+
+    .main_header_content .mobile_nav_btn {
+        display:block!important;
+    }
+
+    .members_row {
+        margin:10px!important;
+        padding:5px!important
+    }
+	
+	.member_search {
+		margin-top:10px!important
+	}
+
+	.page_navigation {
+		margin-top:70px!important;
+	}
+
+	.footer_inner span {
+		background: none!important;
+		-webkit-text-fill-color: green!important;
+    	-webkit-background-clip: none!important;
+	}
+}
