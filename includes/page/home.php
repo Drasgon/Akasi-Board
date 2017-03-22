@@ -86,14 +86,42 @@
 		}
 	} else $html .= '<p class="news_empty">Es sind keine Neuigkeiten verfügbar! <img src="forum/images/emoticons/Smiley12.png"></p>';
 
+	
+	$fp = fsockopen("udp://baneofthelegion.de","9987"); 
+if ($fp) { 
+$ts_status = "Online";
+} else { 
+$ts_status = "Offline";
+} 
+	
 	$html .= '
 	</div>
 	
 	<div class="home_column">
 		<img src="./img/gfx/gfx_img/header_ts.png">
 			<div class="teamspeak_status clearfix">
-				<span id="its559481"><a href="http://www.teamspeak3.com/">teamspeak</a> Hosting by TeamSpeak3.com</span><script type="text/javascript" src="http://view.light-speed.com/teamspeak3.php?IP=ts56.nitrado.net&PORT=12700&QUERY=10011&UID=559481&display=block&font=11px&background=transparent&server_info_background=transparent&server_info_text=%230c6666&server_name_background=transparent&server_name_text=%2300ccff&info_background=transparent&channel_background=transparent&channel_text=%23d99329&username_background=transparent&username_text=%23e6e612"></script>
+				<p>'.$ts_status.'</p>
 			</div>
+	</div>
+	
+	<div class="home_column">
+		<img src="./img/gfx/gfx_img/header_donate.png">
+		<div class="pp_donate">
+			<p>
+				Auch wir haben Laufzeitgebühren für unseren Member-Service (HP und TeamSpeak) zu zahlen. Daher freuen wir uns über jegliche Spenden per PayPal!
+			</p>
+			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+				<input type="hidden" name="cmd" value="_donations">
+				<input type="hidden" name="business" value="Alexander_Bretzke@gmx.de">
+				<input type="hidden" name="lc" value="DE">
+				<input type="hidden" name="item_name" value="Bane of the Legion">
+				<input type="hidden" name="no_note" value="0">
+				<input type="hidden" name="currency_code" value="EUR">
+				<input type="hidden" name="bn" value="PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest">
+				<input type="image" src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Jetzt einfach, schnell und sicher online bezahlen – mit PayPal.">
+				<img alt="" border="0" src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif" width="1" height="1">
+			</form>
+		</div>
 	</div>';
 	
 	echo $html;

@@ -39,51 +39,96 @@ Avatar ändern
 </div>
 
 <div class="account_settingsInner">
-<fieldset>
-<legend>
-Avatar ändern
-</legend>
-<form method="post" action="'.$main->getURI().'&action=uploadAvatar" enctype="multipart/form-data" id="avatarForm">
-	<div id="image-cropper">
-	  <!-- The preview container is needed for background image to work -->
-	  <div class="cropit-image-preview-container">
-		<div class="cropit-image-preview"></div>
-	  </div>
-	  
-	  <input type="range" class="cropit-image-zoom-input" />
-	  
-	  <input type="file" name="file" id="file" accept="image/*" onchange="initializeChange(this);" class="cropit-image-input">
-	  <input type="hidden" name="image-data" class="hidden-image-data" />
-	  <input type="submit" name="submit" value="Senden" class="accSettingsSubmit avatarSubmit">
-	</div>
+	<center>
+		<fieldset>
+		<legend>
+		Avatar ändern
+		</legend>
+		<form method="post" action="'.$main->getURI().'&action=uploadAvatar" enctype="multipart/form-data" id="avatarForm" class="no-smoothstate">
+			<div id="image-cropper">
+			  <!-- The preview container is needed for background image to work -->
+			  <div class="cropit-image-preview-container">
+				<div class="cropit-image-preview"></div>
+			  </div>
+			  
+			  <input type="range" class="cropit-image-zoom-input" />
+			  
+			  <input type="file" name="file" id="file" accept="image/*" onchange="initializeChange(this);" class="cropit-image-input">
+			  <input type="hidden" name="image-data" class="hidden-image-data" />
+			  <input type="submit" name="submit" value="Avatar hochladen" class="accSettingsSubmit avatarSubmit">
+			</div>
 
-        </form>';
+				</form>';
+			if(isset($_GET['action']) && $_GET['action'] == 'updateAvatarBorder') {
+				$main->useFile('./system/controller/processors/acc_settings_avatar_border.php');
+					changeAvatarBorder();
+			}
+			else
+			if(isset($_GET['action']) && $_GET['action'] == 'uploadAvatar' && isset($_FILES["file"])) {
+				$main->useFile('./system/classes/akb_simple_image.class.php');
+				$main->useFile('./system/controller/processors/acc_settings_avatar.php');
+					changeAvatar();
+			} elseif(isset($_GET['action']) && $_GET['action'] == 'uploadAvatar' && !isset($_FILES["file"]))
+			{
+				
+				$avatarUpdateError_fatal = 'Fehler beim Update des Avatars.<br>Eventuell wird das Dateiformat nicht unterstützt oder die hochgeladene Datei war fehlerhaft!';
+					throwError_cc($avatarUpdateError_fatal);
+			}
+			if(isset($_GET['action']) && $_GET['action'] == 'deleteAvatar') {
+				$main->useFile('./system/controller/processors/acc_settings_delavatar.php');
+					deleteAvatar();
+			}
+			
+			$data = $main->getUserData($_SESSION['ID'], 'sid');
+			$avatar_border = $data['avatar_border'];
+			$parts = explode(',', $avatar_border);
+			$r = $parts[0];
+			$g = $parts[1];
+			$b = $parts[2];
+			$a = $parts[3]*100;
+			
 
-	if(isset($_GET['action']) && $_GET['action'] == 'uploadAvatar' && isset($_FILES["file"])) {
-		$main->useFile('./system/classes/akb_simple_image.class.php');
-		$main->useFile('./system/controller/processors/acc_settings_avatar.php');
-			changeAvatar();
-	} elseif(isset($_GET['action']) && $_GET['action'] == 'uploadAvatar' && !isset($_FILES["file"]))
-	{
+		$accSettingsContainer .= '
+
+		<h2>Rahmen ändern</h2>
 		
-		$avatarUpdateError_fatal = 'Fehler beim Update des Avatars.<br>Eventuell wird das Dateiformat nicht unterstützt oder die hochgeladene Datei war fehlerhaft!';
-			throwError_cc($avatarUpdateError_fatal);
-	}
-	if(isset($_GET['action']) && $_GET['action'] == 'deleteAvatar') {
-		$main->useFile('./system/controller/processors/acc_settings_delavatar.php');
-			deleteAvatar();
-	}
-
-$accSettingsContainer .= '
-
-Ihr derzeitiger Avatar:<br />
-<br />
-<img src="'.$_SESSION['avatar'].'">
-<br />
-
-		<form method="post" action="'.$main->getURI().'&action=deleteAvatar" enctype="multipart/form-data">
-		<input type="submit" name="submit" value="Avatar löschen" class="accSettingsSubmit">
+		<form method="post" action="'.$main->getURI().'&action=updateAvatarBorder" enctype="multipart/form-data" style="position:relative; padding-bottom:50px;" onreset="changeBorder()">
+				
+				<p>
+					<h3>Red:</h3>
+					<br />
+					<input type="range" min=0 max=255 value='.$r.' name="r" id="r" onchange="changeBorder()">
+				</p>
+				<p>
+					<h3>Green:</h3>
+					<br />
+					<input type="range" min=0 max=255 value='.$g.' name="g" id="g" onchange="changeBorder()">
+				</p>
+				<p>
+					<h3>Blue:</h3>
+					<br />
+					<input type="range" min=0 max=255 value='.$b.' name="b" id="b" onchange="changeBorder()">
+				</p>
+				<p>
+					<h3>Alpha:</h3>
+					<br />
+					<input type="range" min=0 max=100 value='.$a.' name="a" id="a" onchange="changeBorder()">
+				</p>
+				
+		
+				<input type="submit" name="submit" value="Rahmen ändern" class="accSettingsSubmit avatarSubmit">
+				<input type="reset" name="reset" value="Zurücksetzen" class="accSettingsSubmit avatarSubmit_reset">
 		</form>
+
+	</center>
+		<h2>Ihr derzeitiger Avatar</h2><br />
+		<br />
+		<img src="'.$_SESSION['avatar'].'" style="border: 5px solid rgba('.$avatar_border.')" id="avatar_preview">
+		<br />
+
+				<form method="post" action="'.$main->getURI().'&action=deleteAvatar" enctype="multipart/form-data">
+				<input type="submit" name="submit" value="Avatar löschen" class="accSettingsSubmit">
+				</form>
 
 <div class="changeInformation">	
 <p>
@@ -97,10 +142,10 @@ Folgendes ist vor dem Hochladen eines Avatars zu beachten:
 		Die maximale Dateigröße beträgt 5MB
 		</li>
 		<li>
-		Das zugeschnittene Bild wird nach dem Upload auf eine Größe von 150 x 150 Pixeln skaliert.
+		Das zugeschnittene Bild wird nach dem Upload auf eine Größe von 225 x 225 Pixeln skaliert, um auch bei größerer Ansicht eine hohe Qualität zu erzielen.
 		</li>
 		<li>
-		Durch den Upload stimmen Sie unseren Richtlinien zu, dass wir keine Haftung die hochgeladene Grafik übernehmen.
+		Durch den Upload stimmen Sie unseren Richtlinien zu, dass wir keine Haftung für die hochgeladene Grafik übernehmen.
 		</li>
 		<li>
 		Sie müssen das Urheberrecht für das Bild besitzen, bzw. der Urheber sein. Die Administration übernimmt keine Haftung für enstandene Schäden durch Zuwiderhandlung.

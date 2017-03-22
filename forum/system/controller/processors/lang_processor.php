@@ -11,7 +11,7 @@ if (!isset($main) || $main == NULL)
 function useLanguage($lang_id = NULL)
 {
 
-	$default_lang = 'enGB';
+	$default_lang = 'deDE';
 
     switch ($lang_id) {
         
@@ -30,7 +30,7 @@ function useLanguage($lang_id = NULL)
 	return $include_file;
 }
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 if (!isset($_SESSION['language'])) {
     $get_lang = $db->query("SELECT language FROM $db->table_accdata WHERE account_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))") or die(mysqli_error($connection));
     while ($lang_data = mysqli_fetch_object($get_lang)) {

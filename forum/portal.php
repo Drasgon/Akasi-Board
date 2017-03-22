@@ -11,6 +11,25 @@ if (!isset($db) || $db == NULL)
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 
+if (!isset($survey) || $survey == NULL)
+{
+	$main->useFile('./system/classes/akb_survey.class.php', 1);
+    $survey = new Survey($db, $connection, $main);
+}
+
+	$survey->initializeSurvey($main->serverConfig('active_survey'));
+	//$surveyResult = $survey->outputSurvey();
+	$surveyTitle = $survey->name;
+	$surveyDescription = $survey->description;
+	$surveyData = $survey->html;
+
+	if(isset($_GET['action']) && ($_GET['action'] == 'submitToSurvey' || $_GET['action'] == 'submitToSurveyReverse') && isset($_POST['verify']) && $_POST['verify'] == '12098')
+	{
+		$main->useFile('./system/controller/processors/survey_processor.php');
+	}
+
+
+
 if (!isset($_COOKIE['akb_last_visit'])) {
     echo '
 <div class="userInfobox">
@@ -80,7 +99,7 @@ if((isset($_GET['action']) && $_GET['action'] == 'validuser') && (isset($_GET['t
 	}
 }
 
-if (!isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] == false) {
+if (!isset($_SESSION['STATUS']) || $_SESSION['STATUS'] == false) {
     echo '
 		<ul class="portal_infoList">
 			<li class="visitorPanel">
@@ -107,17 +126,18 @@ if (!isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] == false) {
 				</ul>
 			</li>
 		</ul>';
-} elseif (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+} elseif (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
     
     $userActionBar = '';
     
     $userData = $main->getUserdata($_SESSION['ID'], "sid");
 	
-        $id           = $userData['account_id'];
-        $username     = $userData['name'];
-        $avatar       = $userData['avatar'];
-        $post_counter = $userData['posts'];
-		$profile_views= $userData['profile_views'];
+        $id           			= $userData['account_id'];
+        $username     			= $userData['name'];
+        $avatar       			= $userData['avatar'];
+		$memberAvatar_border 	= $userData['avatar_border'];
+        $post_counter 			= $userData['posts'];
+		$profile_views			= $userData['profile_views'];
         
     
 		if(!$main->checkImage($avatar))
@@ -154,7 +174,7 @@ if (!isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] == false) {
 </div>
 <div class="userAvatar">
 <div class="UserAvatarMsg">
-<img src="' . $avatar . '" class="'.$pngClass.'">
+<img src="' . $avatar . '" class="'.$pngClass.' img-zoom" style="border:5px solid rgba('.$memberAvatar_border.')">
 </div>
 </div>
 <div class="userMessenger">
@@ -258,7 +278,7 @@ echo $newUserCon;
 		</div>
 	</div>
 <?php
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
     echo '
 		<div class="portal_userActions portal_container">
 		<div class="portal_userActions_inner">
@@ -277,13 +297,30 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 		</div>
 	</div>
 	';
+	
+	$survey = '
+	<div class="portal_userActions_inner akb_survey">
+		<div class="portal_ConHeader fancy_font" id="portal_cat1">
+			'.$langGlobal['portal_survey_headline'].'
+		</div>
+		<div class="survey_main">
+			<h3>'.$surveyTitle.'</h3>
+			<p>'.$surveyDescription.'</p>
+			'.$surveyData.'
+		</div>
+	</div>
+	';
 }
+else
+	$survey = '';
+
 echo '
 </div>
 </div>
 
 <div class="portal_center column">
 <div class="portal_userActions portal_container">
+	'.$survey.'
    <div class="portal_userActions_inner">
       <div class="portal_ConHeader fancy_font" id="portal_cat1">
          '.$langGlobal['portal_lang_news'].'
@@ -373,7 +410,7 @@ echo '
 </div>
 	
 	<?php
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
     
     require('./system/interface/ajaxChat.php');
     
@@ -450,20 +487,24 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 		<tbody>';
 
 		while ($latestPosts = mysqli_fetch_object($getLatestPosts)) {
-			$latestID             = $latestPosts->id;
-			$latestMainID         = $latestPosts->main_forum_id;
-			$latestTitle          = $latestPosts->title;
-			$latestCreated        = $latestPosts->date_created;
-			$lastReply            = $latestPosts->last_replyTime;
-			$authorID             = $latestPosts->author_id;
-			$lastAuthorID         = $latestPosts->last_post_author_id;
-			$threads_rating       = $latestPosts->last_post_author_id;
-			$threads_rating_votes = $latestPosts->last_post_author_id;
-			$threads_sub_views    = $latestPosts->views;
-			$threads_sub_posts    = $latestPosts->posts;
+			$latestID				= $latestPosts->id;
+			$latestMainID			= $latestPosts->main_forum_id;
+			$latestTitle			= $latestPosts->title;
+			$latestUrl				= $main->buildThreadUrl($latestID,$latestTitle);
+			$latestCreated			= $latestPosts->date_created;
+			$lastReply				= $latestPosts->last_replyTime;
+			$authorID				= $latestPosts->author_id;
+			$lastAuthorID			= $latestPosts->last_post_author_id;
+			$threads_rating			= $latestPosts->last_post_author_id;
+			$threads_rating_votes	= $latestPosts->last_post_author_id;
+			$threads_sub_views		= $latestPosts->views;
+			$threads_sub_posts		= $latestPosts->posts;
 			
 			$latestCreated = $main->convertTime($latestCreated);
 			$lastReply = $main->convertTime($lastReply);
+			
+			if($main->checkBoardPermission($latestMainID, 1) == false)
+				continue;
 			
 			
 			$get_author    = "SELECT username FROM $db->table_accdata WHERE account_id='" . $authorID . "'";
@@ -514,24 +555,10 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 			if (!(isset($thread_sub_closed) && $threads_sub_closed == 0)) {
 				$threads_sub_title_msg = '';
 				
-				if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+				if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 					
 					$_SESSION['ID'] = session_id();
 					$threadID       = $latestID;
-					$getUser        = $db->query("SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')");
-					while ($userResult = mysqli_fetch_object($getUser)) {
-						$userID = $userResult->id;
-					}
-					
-					$secureThreadID = mysqli_real_escape_string($GLOBALS['connection'], $threadID);
-					$secureUserID   = mysqli_real_escape_string($GLOBALS['connection'], $userID);
-					
-					/*$statusQuery = $db->query("SELECT account_id, thread_id, board_id FROM $db->table_forum_read WHERE account_id=('" . $secureUserID . "') AND thread_id=('" . $secureThreadID . "')");
-					if (mysqli_num_rows($statusQuery) == 1) {
-						$unread_status = false;
-					} else {
-						$unread_status = true;
-					}*/
 					
 					$unread_status = $main->detectUnreadThread($threadID);
 					
@@ -559,7 +586,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 				<strong>
 				</strong>
 				</span>
-				<a href="?page=Index&amp;threadID=' . $latestID . '">
+				<a href="'.$latestUrl.'" title="Zum Thema '.$latestTitle.' springen">
 				' . $latestTitle . '
 				</a>
 				</p>

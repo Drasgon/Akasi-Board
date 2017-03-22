@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2015  Alexander Bretzke
+Copyright (C) 2016  Alexander Bretzke
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -119,264 +119,306 @@ $lastReplyClass = (isset($_GET['sortField']) && $_GET['sortField'] == 'lastReply
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // QUERIES //
-$get_threads = "SELECT id, main_forum_id, icon_id, title, description, author_id, closed, views, posts, date_created, rating, rating_votes, last_post_author_id, last_replyTime FROM $db->table_thread WHERE main_forum_id= ('" . $boardID . "') ";
+$get_threads = "SELECT id, main_forum_id, icon_id, title, description, author_id, closed, views, posts, date_created, rating, rating_votes, last_post_author_id, last_replyTime, sticky FROM $db->table_thread WHERE main_forum_id= ('" . $boardID . "') ";
 
+$fieldSort = 'sticky DESC, ';
 
 switch ($sortField) {
     case "topic":
-        $get_threads .= " ORDER BY title $direction ";
+        $fieldSort .= "title";
         break;
     
     case "rating":
-        $get_threads .= " ORDER BY rating $direction ";
+        $fieldSort .= "rating";
         break;
     
     case "replies":
-        $get_threads .= " ORDER BY posts $direction ";
+        $fieldSort .= "posts";
         break;
     
     case "views":
-        $get_threads .= " ORDER BY views $direction";
+        $fieldSort .= "views";
         break;
     
     case "lastReply":
-        $get_threads .= " ORDER BY last_replyTime $direction ";
+        $fieldSort .= "last_replyTime";
         break;
     default: {
         $lastReplyClass = 'columnLastPost active';
-        $get_threads .= " ORDER BY last_replyTime $direction ";
+        $fieldSort .= "last_replyTime";
     }
         break;
 }
 
 $forum_description = $main->serverConfig("forum_description");
 
-$get_threads .= " LIMIT $start, $perPage";
+$get_threads .= " ORDER BY $fieldSort $direction LIMIT $start, $perPage";
 $sub_forums_result = $db->query($get_threads) or die(mysql_error());
 
-$get_main_sel = "SELECT title, description, closed, icon_id, icon FROM $db->table_boards WHERE id=('" . $boardID . "')";
+$get_main_sel = "SELECT title, description, closed, icon_id, icon, member_exclusive FROM $db->table_boards WHERE id=('" . $boardID . "')";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// BOARD //
-$incrementalCatID = '0';
-// CATERGORIES //
-$board_table      = '
-<div class="mainHeadline">
-    <div class="icons" id="forumiconMain"></div>
-    <div class="headlineContainer">
-      <h1>
-        Forum
-      </h1>
-    </div>
-	<p>'.$forum_description.'</p>
-</div>
-<div class="board_structure">
-<ul class="boardsCat">
-';
-$defineCat        = "SELECT id,name FROM $db->table_categories ORDER BY id ASC";
-$catResult = $db->query($defineCat) or die(mysql_error());
-while ($cat = mysqli_fetch_object($catResult)) {
-    
-    $boardCatId = $cat->id;
-    if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
-        
-        $getCatState = $db->query("SELECT state FROM $db->table_hiddenboards WHERE user_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')) AND cat_id=('" . $boardCatId . "')");
-        
-        if (mysqli_num_rows($getCatState) <= '0') {
-            $db->query("INSERT INTO $db->table_hiddenboards (user_id, cat_id, state) VALUES ((SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')), '" . $boardCatId . "', 1)");
-            $catState = '1';
-        }
-        
-        while ($catStateProcess = mysqli_fetch_object($getCatState)) {
-            $catState = $catStateProcess->state;
-        }
-    } else {
-        $catState = '1';
-    }
-    
-    $boardCatName = $cat->name;
-    $incrementalCatID++;
-    $board_table .= '
-<li class="boardCat_row" id="' . $incrementalCatID . '">
-<div class="catHeaderOuter" title="Kategorie ' . $boardCatName . ' schließen/öffnen.">
-	<div class="catHeader">
-		<div class="CatName">
-			<span>
-				' . $boardCatName . '
-			</span>
-		</div>
-		<div class="lastpost_design">
-				<p>Letzter Beitrag</p>
-			</div>
-	</div>
-</div>
-<ul class="board_body">
-';
-    if ($catState == '1') {
-        
-        
-        $incementalCounter = '0';
-        $get_forums        = "SELECT id, icon, icon_id, title, description, closed FROM $db->table_boards WHERE category=('" . $boardCatId . "')";
-        $forums_result = $db->query($get_forums) or die(mysql_error());
-        while ($forums = mysqli_fetch_object($forums_result)) {
-		
-            $lastThreadID			=	'';
-            $lastThreadTitle		=	'';
-            $lastThreadAuthor		=	'';
-            $lastThreadReply		=	'';
-            $lastThreadAuthorName	=	'';
-            $lastActivity_id		=	'';
-            $fetchLastThread_id		=	'';
-			$num_LastThread			=	'';
-			$msg					=	'';
-			
-			$boardUnread_status		=	false;
-			
-			$totalRows_threads		=	'';
-			$totalRows_unreads		=	'';
-			$totalUnreads			=	'';
-            
-            $board_id      = $forums->id;
-            $board_icon    = $forums->icon;
-            $board_icon_id = $forums->icon_id;
-            $board_closed  = $forums->closed;
-			
-            
-            
-            if ($board_closed == 1) {
-                $board_icon = "./images/icons/closed.png";
-            }
-            if ($board_closed == 0) {
-			
-                $boardUnread_status = $main->detectUnreadThreadsInBoard($board_id);
-				
-                if ($boardUnread_status == false) {
-				
-                    $board_icon       = './images/icons/default.png';
-                    $board_titleClass = '';
-                } else {
-				
-                    $board_icon       = './images/icons/new_post.png';
-                    $board_titleClass = 'newPost-Board';
-					$totalUnreads	  = ("$boardUnread_status");
-                }
-            }
-			
-            $board_title        = $forums->title;
-            $board_description  = $forums->description;
-            
-			
-            $fetchLastThread_id = $db->query("SELECT id FROM $db->table_thread WHERE main_forum_id=('" . $board_id . "') ORDER BY last_replyTime DESC LIMIT 1");
-            while ($lastThreadActive_idNewest = mysqli_fetch_object($fetchLastThread_id)) {
-                $lastActivity_id = $lastThreadActive_idNewest->id;
-				
-				$msg                = 'Von ';		
-				
-				$defineLastThread = "SELECT id,title,last_post_author_id,last_replyTime FROM $db->table_thread WHERE main_forum_id=('" . $board_id . "') AND id=('" . $lastActivity_id . "') ORDER BY last_replyTime ASC LIMIT 0,1";
-            
-			
-            $lastThreadResult = $db->query($defineLastThread) or die(mysql_error());
-            $num_LastThread = mysqli_num_rows($lastThreadResult);
-			
-            if ($num_LastThread >= 1) {
-			
-            while ($lastThreadActive = mysqli_fetch_object($lastThreadResult)) {
-				
-                    $lastThreadID      = $lastThreadActive->id;
-                    $lastThreadTitle   = $lastThreadActive->title;
-                    $lastThreadAuthor  = $lastThreadActive->last_post_author_id;
-                    $lastThreadReplyuF = $lastThreadActive->last_replyTime;
-                    
-                    if (date('Y-m-d', $lastThreadReplyuF) == date('Y-m-d')) {
-                        $lastThreadReplyF = strftime('<span class="timeRange">Heute</span>, %H:%M', $lastThreadReplyuF);
-                    } elseif (date('Y-m-d', $lastThreadReplyuF) == date('Y-m-d', strtotime("Yesterday"))) {
-                        $lastThreadReplyF = strftime('<span class="timeRange">Gestern</span>, %H:%M', $lastThreadReplyuF);
-                    } elseif (date('Y-m-d', $lastThreadReplyuF) < date('Y-m-d', strtotime("Yesterday"))) {
-                        $lastThreadReplyF = strftime("%A, %d %B %Y %H:%M", $lastThreadReplyuF);
-                    }
-                    $lastThreadReply = "($lastThreadReplyF)";
-					
-                }
-                
-                
-                mysqli_free_result($lastThreadResult);
-				
-				if($lastThreadAuthor != 0) // If last author was NOT a guest.
-                {
-					$defineLastAuthor = "SELECT username FROM $db->table_accdata WHERE account_id=('" . $lastThreadAuthor . "')";
-					$lastAuthorResult = $db->query($defineLastAuthor) or die(mysql_error());
-					$lastAuthorActive = mysqli_fetch_object($lastAuthorResult);
-						$lastThreadAuthorName = $lastAuthorActive->username;
+if(!isset($_GET['boardview']))
+{
 
-					mysqli_free_result($lastAuthorResult);
-				}
-				else
-					$lastThreadAuthorName = 'Gast';
-            }
+	// BOARD //
+	$incrementalCatID = '0';
+	// CATERGORIES //
+	$board_table      = '
+	<div class="mainHeadline">
+		<div class="icons" id="forumiconMain"></div>
+		<div class="headlineContainer">
+		  <h1>
+			Forum
+		  </h1>
+		</div>
+		<p>'.$forum_description.'</p>
+	</div>
+	<div class="board_structure">
+	<ul class="boardsCat">
+	';
+	$defineCat        = "SELECT id,name FROM $db->table_categories ORDER BY id ASC";
+	$catResult = $db->query($defineCat) or die(mysql_error());
+	while ($cat = mysqli_fetch_object($catResult)) {
+		
+		$boardCatId = $cat->id;
+		if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 			
+			$getCatState = $db->query("SELECT state FROM $db->table_hiddenboards WHERE user_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')) AND cat_id=('" . $boardCatId . "')");
+			
+			if (mysqli_num_rows($getCatState) <= '0') {
+				$db->query("INSERT INTO $db->table_hiddenboards (user_id, cat_id, state) VALUES ((SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')), '" . $boardCatId . "', 1)");
+				$catState = '1';
+			}
+			
+			while ($catStateProcess = mysqli_fetch_object($getCatState)) {
+				$catState = $catStateProcess->state;
+			}
+		} else {
+			$catState = '1';
 		}
 		
-		if (!$num_LastThread) {
+		$boardCatName = $cat->name;
+		$incrementalCatID++;
+		$board_table .= '
+			<li class="boardCat_row" id="' . $incrementalCatID . '">
+			<div class="catHeaderOuter" title="Kategorie ' . $boardCatName . ' schließen/öffnen.">
+				<div class="catHeader">
+					<div class="CatName">
+						<span>
+							' . $boardCatName . '
+						</span>
+					</div>
+					<div class="lastpost_design">
+							<p>Letzter Beitrag</p>
+						</div>
+				</div>
+			</div>
+			<ul class="board_body">
+			';
 			
-                $lastThreadResult = '';
-                $msg          = 'In dieser Kategorie sind noch keine Themen vorhanden';
+		echo $board_table;
+		$board_table = '';
+		$board_list = '';
+			
+		if ($catState == '1') {
+			
+			
+			$incementalCounter = '0';
+			$get_forums        = "SELECT id, icon, icon_id, title, description, closed, member_exclusive FROM $db->table_boards WHERE category=('" . $boardCatId . "')";
+			$forums_result = $db->query($get_forums) or die(mysql_error());
+			while ($forums = mysqli_fetch_object($forums_result))
+			{
+			
+				$lastThreadID			=	'';
+				$lastThreadTitle		=	'';
+				$lastThreadAuthor		=	'';
+				$lastThreadReply		=	'';
+				$lastThreadAuthorName	=	'';
+				$lastActivity_id		=	'';
+				$fetchLastThread_id		=	'';
+				$num_LastThread			=	'';
+				$msg					=	'';
 				
-        }
-            
-            $board_table .= '
+				$boardUnread_status		=	false;
+				
+				$totalRows_threads		=	'';
+				$totalRows_unreads		=	'';
+				$totalUnreads			=	'';
+				
+				$board_id      = $forums->id;
+				$board_icon    = $forums->icon;
+				$board_icon_id = $forums->icon_id;
+				$board_closed  = $forums->closed;
+				$member_exclusive = $forums->member_exclusive;
+				
+				
+				
+				if($member_exclusive == 0)
+				{
+					$member_exclusive_string = '<p class="guestsAllowed">Gäste zugelassen</p>';
+				}
+				else if($member_exclusive == 1)
+				{
+					$member_exclusive_string = '<p class="guestsNotAllowed">Gäste nicht zugelassen</p>';
+				}
+				
+				if ($board_closed == 1) {
+					$board_icon = "./images/icons/closed.png";
+				}
+				if ($board_closed == 0) {
+				
+					$boardUnread_status = $main->detectUnreadThreadsInBoard($board_id);
+					
+					if ($boardUnread_status == false) {
+					
+						$board_icon       = './images/icons/default.png';
+						$board_titleClass = '';
+						$forumicon = 'forumicon';
+						$list_class = '';
+					} else {
+					
+						$board_icon       = './images/icons/new_post.png';
+						$board_titleClass = 'newPost-Board';
+						$totalUnreads	  = ("$boardUnread_status");
+						$forumicon = 'forumicon_newpost';
+						$list_class = 'class="newpost"';
+					}
+				}
+				
+				$board_title        = $forums->title;
+				$board_description  = $forums->description;
+				
+				
+				$fetchLastThread_id = $db->query("SELECT id FROM $db->table_thread WHERE main_forum_id=('" . $board_id . "') ORDER BY last_replyTime DESC LIMIT 1");
+				while ($lastThreadActive_idNewest = mysqli_fetch_object($fetchLastThread_id)) {
+					$lastActivity_id = $lastThreadActive_idNewest->id;
+					
+					$msg                = 'Von ';		
+					
+					$defineLastThread = "SELECT id,title,last_post_author_id,last_replyTime FROM $db->table_thread WHERE main_forum_id=('" . $board_id . "') AND id=('" . $lastActivity_id . "') ORDER BY last_replyTime ASC LIMIT 0,1";
+				
+				
+				$lastThreadResult = $db->query($defineLastThread) or die(mysql_error());
+				$num_LastThread = mysqli_num_rows($lastThreadResult);
+				
+				if ($num_LastThread >= 1) {
+				
+				while ($lastThreadActive = mysqli_fetch_object($lastThreadResult)) {
+					
+						$lastThreadID		= $lastThreadActive->id;
+						$lastThreadTitle	= $lastThreadActive->title;
+						$lastThreadUrl		= $main->buildThreadUrl($lastThreadID, $lastThreadTitle);
+						$lastThreadAuthor	= $lastThreadActive->last_post_author_id;
+						$lastThreadReplyuF	= $lastThreadActive->last_replyTime;
+						
+						if (date('Y-m-d', $lastThreadReplyuF) == date('Y-m-d')) {
+							$lastThreadReplyF = strftime('<span class="timeRange">Heute</span>, %H:%M', $lastThreadReplyuF);
+						} elseif (date('Y-m-d', $lastThreadReplyuF) == date('Y-m-d', strtotime("Yesterday"))) {
+							$lastThreadReplyF = strftime('<span class="timeRange">Gestern</span>, %H:%M', $lastThreadReplyuF);
+						} elseif (date('Y-m-d', $lastThreadReplyuF) < date('Y-m-d', strtotime("Yesterday"))) {
+							$lastThreadReplyF = strftime("%A, %d %B %Y %H:%M", $lastThreadReplyuF);
+						}
+						$lastThreadReply = "($lastThreadReplyF)";
+						
+					}
+					
+					
+					mysqli_free_result($lastThreadResult);
+					
+					if($lastThreadAuthor != 0) // If last author was NOT a guest.
+					{
+						$defineLastAuthor = "SELECT username FROM $db->table_accdata WHERE account_id=('" . $lastThreadAuthor . "')";
+						$lastAuthorResult = $db->query($defineLastAuthor) or die(mysql_error());
+						$lastAuthorActive = mysqli_fetch_object($lastAuthorResult);
+							$lastThreadAuthorName = $lastAuthorActive->username;
+
+						mysqli_free_result($lastAuthorResult);
+					}
+					else
+						$lastThreadAuthorName = 'Gast';
+				}
+				
+			}
+			
+			if (!$num_LastThread) {
+				
+					$lastThreadResult = '';
+					$msg          = 'In dieser Kategorie sind noch keine Themen vorhanden';
+					
+			}
+				$board_list = '';
+				
+				$board_list .= '
+					<li '.$list_class.'>
+						<div class="boardList">
+							<div class="innerListTitle">
+								<div class="BoardListIcon">
+									<div class="icons" id="'.$forumicon.'"></div>
+								</div>
+								<div class="BoardListTitleContent">
+									<h4 class="boardTitle ' . $board_titleClass . '">
+										<a href="?page=Index&boardview=' . $board_id . '" title="Zum Board ' . $board_title . ' springen.">
+											' . $board_title . $totalUnreads . '
+										</a>
+									</h4>
+									<p class="desc specialP">
+										' . $board_description . '
+									</p>
+									'.$member_exclusive_string.'
+								</div>
+							</div>
+							<div class="boardThreadData">
+								<h4 class="boardTitle ' . $board_titleClass . '">';
+									if (!$num_LastThread <= 0) {
+										$board_list .= '
+											<a href="'.$lastThreadUrl.'" title="Zum Thread ' . $lastThreadTitle . ' springen.">
+											' . $lastThreadTitle . '
+											</a>';
+									}
+									$board_list .= '
+								</h4>
+								<p class="desc specialP">
+									' . $msg . '
+									<a href="?page=Profile&amp;User=' . $lastThreadAuthor . '">
+										' . $lastThreadAuthorName . '
+									</a>
+									<span class="lastPostDateCon">  ' . $lastThreadReply . '  </span>
+								</p>
+							</div>
+						</div>
+					</li>';
 
 
-<li>
-<div class="boardList">
-	<div class="innerListTitle">
-		<div class="BoardListIcon">
-			<div class="icons" id="forumicon"></div>
-		</div>
-		<div class="BoardListTitleContent">
-			<h4 class="boardTitle ' . $board_titleClass . '">
-				<a href="?page=Index&boardview=' . $board_id . '" title="Zum Board ' . $board_title . ' springen.">
-					' . $board_title . $totalUnreads . '
-				</a>
-			</h4>
-			<p class="desc specialP">
-				' . $board_description . '
-			</p>
-		</div>
+				if($main->boardConfig($board_id, 'member_exclusive') == 1)
+				{
+					if(isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == TRUE)
+					{
+						echo $board_list;
+					}
+				}
+				else if($main->boardConfig($board_id, 'member_exclusive') == 0)
+				{
+					echo $board_list;
+				}
+		
+			}
+		}
+		
+		$board_table = '';
+		$board_table .= '
+	</ul>
+	</li>
+	';
+	}
+	$board_table .= '
 	</div>
-	<div class="boardThreadData">
-		<h4 class="boardTitle ' . $board_titleClass . '">';
-            if (!$num_LastThread <= 0) {
-                $board_table .= '
-<a href="?page=Index&threadID=' . $lastThreadID . '" title="Zum Thread ' . $lastThreadTitle . ' springen.">
-' . $lastThreadTitle . '
-</a>';
-            }
-            $board_table .= '
-</h4>
-<p class="desc specialP">
-' . $msg . '
-<a href="?page=Profile&amp;User=' . $lastThreadAuthor . '">
-' . $lastThreadAuthorName . '</a>
-<span class="lastPostDateCon">  ' . $lastThreadReply . '  </span>
-</p>
-</div>
-</div>
-</li>
-';
-        }
-    }
-    $board_table .= '
-</ul>
-</li>
-';
-}
-$board_table .= '
-</div>
-</ul>
+	</ul>
 
-'.$icon_legend.'
-';
+	'.$icon_legend.'
+	';
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -393,11 +435,22 @@ if ($boardID) {
         
         $sel_main_result = $db->query($get_main_sel) or die(mysql_error());
         while ($main_board_selected = mysqli_fetch_object($sel_main_result)) {
-            $board_sel_title   = $main_board_selected->title;
-            $board_sel_desc    = $main_board_selected->description;
-            $board_sel_icon    = $main_board_selected->icon;
-            $board_sel_icon_id = $main_board_selected->icon_id;
-            $board_sel_closed  = $main_board_selected->closed;
+            $board_sel_title	= $main_board_selected->title;
+            $board_sel_desc		= $main_board_selected->description;
+            $board_sel_icon		= $main_board_selected->icon;
+            $board_sel_icon_id	= $main_board_selected->icon_id;
+            $board_sel_closed	= $main_board_selected->closed;
+            $member_exclusive	= $main_board_selected->member_exclusive;
+			
+			if($member_exclusive == 1)
+			{
+				if(!isset($_SESSION) || (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == FALSE))
+				{
+					throwError('Sie haben leider nicht die notwendigen Zugriffsrechte, um diese Seite zu besuchen.');
+					
+					return;
+				}
+			}
             
             if ($board_sel_closed == 1) {
                 $board_sel_icon = "./images/icons/closed.png";
@@ -529,64 +582,65 @@ Thema erstellen
 if($total_rows >= 1)
 {
 
-$sub_table .= '
-<table class="tableList">
-<thead>
-<tr class="tableHead">
-<th colspan="2" class="' . $topicClass . '">
-<div>
-<a href="?page=Index&boardview=' . $boardID . '&sortField=topic&direction=' . $linkDirection . '">
-Thema		  	  
-<div class="lP_descSort">
-</div>
+	$sub_table .= '
+	<table class="tableList">
+	<thead>
+	<tr class="tableHead">
+	<th colspan="2" class="' . $topicClass . '">
+	<div>
+	<a href="?page=Index&boardview=' . $boardID . '&sortField=topic&direction=' . $linkDirection . '">
+	Thema		  	  
+	<div class="lP_descSort">
+	</div>
 
-</a>
-</div>
-</th>
-<th class="' . $ratingClass . '">
-<div>
-<a href="?page=Index&boardview=' . $boardID . '&sortField=rating&direction=' . $linkDirection . '">
-Nutzerbewertung	  
-<div class="lP_descSort">
-</div>
+	</a>
+	</div>
+	</th>
+	<th class="' . $ratingClass . '">
+	<div>
+	<a href="?page=Index&boardview=' . $boardID . '&sortField=rating&direction=' . $linkDirection . '">
+	Nutzerbewertung	  
+	<div class="lP_descSort">
+	</div>
 
-</a>
-</div>
-</th>
-<th class="' . $repliesClass . '">
-<div>
-<a href="?page=Index&boardview=' . $boardID . '&sortField=replies&direction=' . $linkDirection . '">
-Antworten	  
-<div class="lP_descSort">
-</div>
+	</a>
+	</div>
+	</th>
+	<th class="' . $repliesClass . '">
+	<div>
+	<a href="?page=Index&boardview=' . $boardID . '&sortField=replies&direction=' . $linkDirection . '">
+	Antworten	  
+	<div class="lP_descSort">
+	</div>
 
-</a>
-</div>
-</th>
-<th class="' . $viewsClass . '">
-<div>
-<a href="?page=Index&boardview=' . $boardID . '&sortField=views&direction=' . $linkDirection . '">
-Ansichten
-<div class="lP_descSort">
-</div>
+	</a>
+	</div>
+	</th>
+	<th class="' . $viewsClass . '">
+	<div>
+	<a href="?page=Index&boardview=' . $boardID . '&sortField=views&direction=' . $linkDirection . '">
+	Ansichten
+	<div class="lP_descSort">
+	</div>
 
-</a>
-</div>
-</th>
-<th class="' . $lastReplyClass . '">
-<div>
-<a href="?page=Index&boardview=' . $boardID . '&sortField=lastReply&direction=' . $linkDirection . '">
-Letzte Antwort 
-<div class="lP_descSort">
-</div>
+	</a>
+	</div>
+	</th>
+	<th class="' . $lastReplyClass . '">
+	<div>
+	<a href="?page=Index&boardview=' . $boardID . '&sortField=lastReply&direction=' . $linkDirection . '">
+	Letzte Antwort 
+	<div class="lP_descSort">
+	</div>
 
-</a>
-</div>
-</th>
-</tr>
-</thead>
-<tbody>
-';
+	</a>
+	</div>
+	</th>
+	</tr>
+	</thead>
+	<tbody>
+	
+	';
         
         
         while ($sub_forums = mysqli_fetch_object($sub_forums_result)) {
@@ -599,7 +653,9 @@ Letzte Antwort
             $threads_sub_description    = $sub_forums->description;
             $threads_sub_views          = $sub_forums->views;
             $threads_sub_posts          = $sub_forums->posts;
+            $threads_sticky	            = $sub_forums->sticky;
             $threads_sub_dateCreated_uF = $sub_forums->date_created;
+			$threads_sub_link			= $main->buildThreadUrl($threads_id, $threads_sub_title);
             
             $actualTime = time();
             if (date('Y-m-d', $threads_sub_dateCreated_uF) == date('Y-m-d')) {
@@ -668,13 +724,22 @@ Letzte Antwort
 				$threads_participant_last = 'Gast';
             
             if ($threads_sub_closed == 1) {
-                $threads_sub_icon      = ' class="threadicons" id="thread_closed"';
-                $threads_sub_title_msg = '<font color="red">[CLOSED]</font>';
+				if($threads_sticky == 0)
+				{
+					$threads_sub_icon      = ' class="threadicons" id="thread_closed"';
+				}
+				else
+				{
+					$threads_sub_icon      = ' class="threadicons" id="thread_closed_sticky"';
+				}
+				$threads_sub_title_msg = '<span class="closedString">[Geschlossen]</span>';
+                
             }
             if ($threads_sub_closed == 0) {
-                $threads_sub_title_msg = '';
                 
-                if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+				$threads_sub_title_msg = '';
+				
+                if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
                     
                     $_SESSION['ID'] = session_id();
                     $threadID       = $threads_id;
@@ -694,17 +759,37 @@ Letzte Antwort
                     }
                     
                     if ($unread_status == false) {
-                        $threads_sub_icon = ' class="threadicons" id="thread_def"';
+						if($threads_sticky == 0)
+							$threads_sub_icon      = ' class="threadicons" id="thread_def"';
+						else
+							$threads_sub_icon      = ' class="threadicons" id="thread_def_sticky"';
                     } else {
-                        $threads_sub_icon = ' class="threadicons" id="thread_new"';
+						if($threads_sticky == 0)
+							$threads_sub_icon      = ' class="threadicons" id="thread_new"';
+						else
+							$threads_sub_icon      = ' class="threadicons" id="thread_new_sticky"';
                     }
                 } else {
-                    $threads_sub_icon = ' class="threadicons" id="thread_def"';
+					if($threads_sticky == 0)
+							$threads_sub_icon      = ' class="threadicons" id="thread_def"';
+						else
+							$threads_sub_icon      = ' class="threadicons" id="thread_def_sticky"';
+						
                 }
             }
+			
+			if($threads_sticky == 1)
+			{
+				$threads_sub_title_msg 	= '<span class="stickyString">[Angeheftet]</span>' . $threads_sub_title_msg;
+				$threads_row_class		= 'stickyBackground';
+			}
+			else
+			{
+				$threads_row_class		= '';
+			}
             
             $sub_table .= '
-				<tr class="container-1 smoothTransitionFast">
+				<tr class="container-1 smoothTransitionFast '.$threads_row_class.'">
 					<td class="columnIcon">
 						<div ' . $threads_sub_icon . '></div>
 					</td>
@@ -716,7 +801,7 @@ Letzte Antwort
 										' . $threads_sub_title_msg . '
 									</strong>
 								</span>
-								<a href="?page=Index&amp;threadID=' . $threads_id . '">
+								<a href="'.$threads_sub_link.'">
 									' . $threads_sub_title . '
 								</a>
 							</p>
@@ -837,12 +922,12 @@ if ($boardID) {
     if (isset($_GET['form']) && $_GET['form'] == 'threadAdd') {
         
         if (isset($_GET['action']) && $_GET['action'] == 'threadAdd') {
-            if (isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] = true) {
+            if (isset($_SESSION['STATUS']) || $_SESSION['STATUS'] = true) {
                 $main->useFile('./system/controller/board_controller/board_add_thread.php');
                 $add_thread_status = addThread();
             }
         }
-        if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+        if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
             if (!isset($add_thread_status) || (isset($add_thread_status['threadAddStatus']) && $add_thread_status['threadAddStatus'] == false)) {
 			
 			$string = '';
@@ -862,13 +947,14 @@ $threadContainer = '
                     $token = mysqli_real_escape_string($GLOBALS['connection'], $_GET['token']);
                     $query = $db->query("SELECT title, content FROM $db->table_thread_saves WHERE token = ('" . $token . "') AND user_id = (SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
                     
-                    while ($results = mysqli_fetch_object($query)) {
+                    if($results = mysqli_fetch_object($query)) {
                         $title   = $results->title;
                         $content = $results->content;
                         
-                        $string = 'value="' . $title . '"';
-                        
+                        $string = 'value="' . $title . '"'; 
                     }
+					else
+						$content = '';
                 }
                 if (!isset($_GET['token']))
                     $content = '';
@@ -880,21 +966,28 @@ $threadContainer .= '&form=threadAdd&action=threadAdd" class="threadAddForm" id=
     <legend>
       Themen Titel
     </legend>
-	<select>
-		<option>
-		</option>
-		<option>
-			RP
-		</option>
-		<option>
-			Wichtig
-		</option>
-		<option>
-			Off-Topic
-		</option>
-	</select>
+	<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
     <input type="text" class="threadTitleInput" id="threadTitleInput" name="threadTitleInput" style="border: 2px solid rgba(255, 0, 0, 0); width: 300px;" '.$string.'>
   </legend>
+  <script>tinymce.init({ 
+		skin_url: "css/tinymce",
+		skin: "charcoal",
+		language_url : "lang/tinymce/de.js",
+		language: "de",
+		selector:"#threadAddArea",
+		plugins: [
+		"autoresize advlist autolink lists link image charmap print preview hr anchor pagebreak",
+		"searchreplace wordcount visualblocks visualchars code fullscreen",
+		"insertdatetime media nonbreaking save table contextmenu directionality",
+		"emoticons template paste textcolor colorpicker textpattern imagetools codesample"
+	  ],
+		toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+		  toolbar2: "print preview media | forecolor backcolor fontsizeselect emoticons | codesample",
+		  image_advtab: true,
+		autoresize_min_height: 350,
+		autoresize_max_height: 550
+		
+	});</script>
   </fieldset>
   <fieldset class="PostAddLegend">
     <legend>
@@ -905,12 +998,6 @@ $threadContainer .= '&form=threadAdd&action=threadAdd" class="threadAddForm" id=
                 '.$content.'
 
 	</textarea>
-<script type="text/javascript">
-CKEDITOR.replace("threadAddArea", { 
-language: "de", 
-enterMode : CKEDITOR.ENTER_BR
-});
-</script>
 	  <script src="./javascript/thread_save.js"></script>
     <div class="submitPost" style="margin:30px 0;">
       <input type="submit" value="Absenden" id="threadAddSubmitBtn">

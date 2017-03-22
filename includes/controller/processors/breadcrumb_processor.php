@@ -1,18 +1,20 @@
 <?php
 
-	if (isset($_GET['page']) && !empty($_GET['page']))
-		$current_page = $_GET['page'];
-	else
-		$current_page = 'index';
-
 	$page_data = ARRAY(
 		'index' => ARRAY('iconhome', 'Home'),
 		'members' => ARRAY('iconmembers', 'Mitglieder'),
-		'media' => ARRAY('iconmedia', 'Media'),
+		'calendar' => ARRAY('iconcalendar', 'Kalender'),
 		'aboutus' => ARRAY('iconinfo', 'Über Uns'),
 		'contact' => ARRAY('iconcontact', 'Impressum'),
 		'forum' => ARRAY('iconforum', 'Forum'),
 	);
+
+	if ((isset($_GET['page']) && !empty($_GET['page'])) && (array_key_exists($_GET['page'], $page_data)))
+		$current_page = $_GET['page'];
+	else
+		$current_page = 'index';
+
+	
 
 	$html = '';
 	

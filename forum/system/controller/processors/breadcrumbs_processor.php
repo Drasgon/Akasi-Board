@@ -71,30 +71,35 @@ switch($page) {
 		$page_link = '?page=PrivacyPolicy';
 		break;
 	case 'Profile':
-	if(isset($_GET['User'])) {
-		$secureUser = mysqli_real_escape_string($GLOBALS['connection'], $_GET['User']);
-		$getUser = $db->query("SELECT username, avatar FROM $db->table_accdata WHERE account_id=('".$secureUser."')");
-		if(mysqli_num_rows($getUser) == 0) {
-			require('./system/interface/errorpage_cC.php');
-			ThrowError_cC('Der gesuchte User existiert nicht!');
-			$page_link = '?page=Profile';
-			$page_id = 'navMembers'; 
-			} else {
-					$page_link = '?page=Profile&User='.$_GET['User'].'';
-					$processUser = mysqli_fetch_object($getUser);
-					$user = $processUser->username;
-					$avatar = $processUser->avatar;
+			if(isset($_GET['User'])) {
+					$secureUser = mysqli_real_escape_string($GLOBALS['connection'], $_GET['User']);
+					$getUser = $main->getUserdata($secureUser);
 					
-					$page = 'Profil von '.$user.'';
-					$page_id = 'navMembers'; 
-					$page_style = 'style="background-image: url('.$avatar.')"';
+					if(!$getUser || $getUser['accepted'] == 0) {
+						$page_link = '?page=Profile';
+						$page_id = 'navMembers'; 
+						$page = 'Profil eines Users';
+					} else {
+						$page_link = '?page=Profile&User='.$_GET['User'].'';
+						$user = $getUser['name'];
+						$avatar = $getUser['avatar'];
+						
+						$page = 'Profil von '.$user.'';
+						$page_id = 'navMembers'; 
+						$page_style = 'style="background-image: url('.$avatar.')"';
+					}
+				}
+			if(isset($_GET['Tab']) && $_GET['Tab'] == 'Edit') { 
+					$page = 'Profil bearbeiten';
+					$page_id = 'profiledit';
+					$page_link = '?page=Profile&Tab=Edit';
+				}
+			if(!(isset($_GET['Tab']) && $_GET['Tab'] == 'Edit') && !(isset($_GET['User'])))
+			{
+				$page_link = '?page=Profile';
+				$page_id = 'navMembers'; 
+				$page = 'Profil eines Users';
 			}
-		}
-	if(isset($_GET['Tab']) && $_GET['Tab'] == 'Edit') { 
-			$page = 'Profil bearbeiten';
-			$page_id = 'profiledit';
-			$page_link = '?page=Profile&Tab=Edit';
-		}
 		break;
 	case 'Register':
 		$page_id = 'register';
@@ -125,24 +130,35 @@ switch($page) {
 if (isset($_GET["page"]) && $_GET["page"] == 'Index' && isset($_GET['boardview']) || isset($_GET['threadID'])) {
 
 	if (isset($_GET['boardview'])) {
-		$fetchBoard = $db->query("SELECT title FROM $db->table_boards WHERE id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['boardview'])."')");
-		while ($board = mysqli_fetch_object($fetchBoard)) {
+		
+		$boardID = mysqli_real_escape_string($GLOBALS['connection'], $_GET['boardview']);
+		
+		$fetchBoard = $db->query("SELECT title FROM $db->table_boards WHERE id=('".$boardID."')");
+		if ($board = mysqli_fetch_object($fetchBoard)) {
 			$board_name = $board->title;
-			$location_start .= '<a href="?page=Index&boardview='.$_GET['boardview'].'"><li><div class="icons" id="forumicon"></div><p>'.$board_name.'</p></li></a>';
+			
+			if($main->checkBoardPermission($boardID, 1) == true)
+				$location_start .= '<a href="?page=Index&boardview='.$_GET['boardview'].'"><li><div class="icons" id="forumicon"></div><p>'.$board_name.'</p></li></a>';
 		}
-			}
+	}
 	if (isset($_GET['threadID'])) {
 			$fetchBoard = $db->query("SELECT id, title FROM $db->table_boards WHERE id=(SELECT main_forum_id FROM $db->table_thread WHERE id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."'))");
-		while ($board = mysqli_fetch_object($fetchBoard)) {
-			$board_id = $board->id;
+		if ($board = mysqli_fetch_object($fetchBoard)) {
+			$boardID = $board->id;
 			$board_name = $board->title;
-			$location_start .= '<a href="?page=Index&boardview='.$board_id.'"><li><div class="icons" id="forumicon"></div><p>'.$board_name.'</p></li></a>';
+			
+			if($main->checkBoardPermission($boardID, 1) == true)
+				$location_start .= '<a href="?page=Index&boardview='.$boardID.'"><li><div class="icons" id="forumicon"></div><p>'.$board_name.'</p></li></a>';
 		}
-		$fetchThread = $db->query("SELECT id,title FROM $db->table_thread WHERE id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."')");
-		while ($thread = mysqli_fetch_object($fetchThread)) {
+		$fetchThread = $db->query("SELECT id,title,main_forum_id FROM $db->table_thread WHERE id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."')");
+		if ($thread = mysqli_fetch_object($fetchThread)) {
 			$thread_id = $thread->id;
 			$thread_name = $thread->title;
-			$location_start .= '<a href="?page=Index&threadID='.$thread_id.'"><li><div class="icons" id="threadicon"></div><p>'.$thread_name.'</p></li></a>';
+			$boardID = $thread->main_forum_id;
+			$link = $main->buildThreadUrl($thread_id, $thread_name);
+			
+			if($main->checkBoardPermission($boardID, 1) == true)
+				$location_start .= '<a href="'.$link.'"><li><div class="icons" id="threadicon"></div><p>'.$thread_name.'</p></li></a>';
 		}
 	}
 

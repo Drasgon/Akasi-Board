@@ -3,24 +3,30 @@ $pageRights = 'Sie haben leider nicht die notwendigen Zugriffsrechte, um diese S
 $getIssue = "Die aktuelle URL enthält unzulässige Werte, bitte überprüfen Sie die Schreibweise und Richtigkeit der Daten.";
 $postEdit_differentAuthors = 'Dieser Beitrag ist nicht ihrem Account zugeordnet, ein Bearbeiten ist daher nicht möglich.';
 
-function throwError($ErrorPgMsg) {
+function throwError($ErrorPgMsg, $linkExt = NULL) {
 
-	if(isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] == '')
-		$prevPage = $_SERVER['HTTP_REFERER'];
+	if($linkExt != NULL)
+		$linkExt = $linkExt;
 	else
-		$prevPage = "http://" . $_SERVER['HTTP_HOST'];
+	{
+		if(isset($_SERVER['HTTP_REFERER']))
+			$linkExt = $_SERVER['HTTP_REFERER'];
+		else
+			$linkExt = '?page=Portal';
+	}
+	
 
-	$errorString ='
-	<div class="alertMain">
+	$errorString = '
+	<div class="errorMain">
 		<center>
-			<img src="./images/graphics/warning_detailed.png" width="70px" height="67px" class="warningImg">
+			<div class="icons_big" id="warning"></div>
 		</center>
 		<div class="innerWarning">
 			<p>
 				'.$ErrorPgMsg.'
 			</p>
 			<p>
-				<a href="'.$prevPage.'" class="ErrorLink">
+				<a href="'.$linkExt.'" class="ErrorLink">
 					Zurück zur vorherigen Seite
 				</a>
 			</p>

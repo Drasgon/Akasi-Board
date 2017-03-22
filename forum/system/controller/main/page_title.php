@@ -69,12 +69,14 @@ switch($page) {
 	case 'Profile':
 		if(isset($_GET['User'])) { 
 			$secureUser = mysqli_real_escape_string($GLOBALS['connection'], $_GET['User']);
-			$getUser = $db->query("SELECT username FROM $db->table_accdata WHERE account_id=('".$secureUser."')");
+			$getUser = $main->getUserdata($secureUser);
 			
-			if(!mysqli_num_rows($getUser) == 0) {
-				$page_link = '/?page=Profile&User='.$_GET['User'].'';
-				$processUser = mysqli_fetch_object($getUser);
-				$location = $processUser->username;
+			if(!$getUser || $getUser['accepted'] == 0) {
+				$location = 'Profil eines Users';
+			}
+			else
+			{
+				$location = $getUser['name'];
 			}
 			
 		}
@@ -104,20 +106,39 @@ switch($page) {
 if (isset($page) && $page == "Index") {
 
 	if (isset($_GET['boardview'])) {
-		$fetchBoard = $db->query("SELECT title FROM $db->table_boards WHERE id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['boardview'])."')");
+		
+		$boardID = mysqli_real_escape_string($GLOBALS['connection'], $_GET['boardview']);
+		
+		$fetchBoard = $db->query("SELECT title FROM $db->table_boards WHERE id=('".$boardID."')");
 		if($board = mysqli_fetch_object($fetchBoard))
-			$location = $board->title;
+		{
+			if($main->checkBoardPermission($boardID, 1) == false)
+				$location = 'Error';
+			else
+				$location = $board->title;
+			
+		}
 		else
 			$location = $errorString;
 	}
 			
 	if (isset($_GET['threadID'])) {
-		$fetchThread = $db->query("SELECT title FROM $db->table_thread WHERE id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."')");
+		
+		$threadID = mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID']);
+		
+		$fetchThread = $db->query("SELECT title, main_forum_id FROM $db->table_thread WHERE id=('".$threadID."')");
 		if($thread = mysqli_fetch_object($fetchThread))
-			$location = $thread->title;
+		{
+			$boardID = $thread->main_forum_id;
+			
+			if($main->checkBoardPermission($boardID, 1) == false)
+				$location = 'Error';
+			else
+				$location = $thread->title;
+			
+		}
 		else
 			$location = $errorString;
-		
 	}
 
 }

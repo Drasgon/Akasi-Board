@@ -1,5 +1,7 @@
 <?php
 	echo '
+	<div class="header_logo_fill">
+	</div>
 	<div class="main_header_content title title_bold clearfix">
 		<a href="?page=index">
 			<div class="logo_img"></div>
@@ -26,9 +28,9 @@
 		</nav>
 		<nav class="right_column clearfix desktop_nav">
 			<li>
-				<a href="?page=media" class="fancy_font">
-					<div class="icon_big" id="iconmedia"></div>
-					Media
+				<a href="?page=calendar" class="fancy_font">
+					<div class="icon_big" id="iconcalendar"></div>
+					Kalender
 				</a>
 			</li>
 			<li>
@@ -66,9 +68,9 @@
 				</a>
 			</li>
 			<li>
-				<a href="?page=media" class="fancy_font">
-					<div class="icon" id="iconmedia"></div>
-					Media
+				<a href="?page=calendar" class="fancy_font">
+					<div class="icon" id="iconcalendar"></div>
+					Kalender
 				</a>
 			</li>
 			<li>

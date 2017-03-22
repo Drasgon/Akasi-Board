@@ -24,44 +24,56 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 include('page_title.php');
 include('breadcrumb_processor.php');
 
-/*  <---- Portal ---->  */
-(!isset($_GET['page']) || $_GET['page'] == "index") ? 
-include('includes/page/home.php') : '';
-/*  <---- Portal END ---->  */
+if(isset($_GET['page']) && !empty($_GET['page']))
+{
+	switch($_GET['page'])
+	{
+		/*  <---- Portal ---->  */
+		case 'index':
+			include('includes/page/home.php');
+		break;
+		
+		
+		/*  <---- Members ---->  */
+		case 'members':
+			include('includes/page/members.php');
+		break;
 
-
-
-/*  <---- Board ---->  */
-(isset($_GET['page']) && $_GET['page'] == "members") ? 
-include('includes/page/members.php') : '';
-/*  <---- Board END ---->  */
-
-
-
-/*  <---- Thread ---->  */
-(isset($_GET['page']) && $_GET['page'] == "media") ? 
-include('includes/page/media.php') : '';
-/*  <---- Thread END ---->  */
-
-
-
-/*  <---- Forum ---->  */
-(isset($_GET['page']) && $_GET['page'] == "forum") ? 
-include('includes/modules/wip_page.php') : '';
-/*  <---- Forum END ---->  */
-
-
-
-/*  <---- Members ---->  */
-(isset($_GET['page']) && $_GET['page'] == "aboutus") ? 
-include('includes/page/aboutus.php') : '';
-/*  <---- Members END ---->  */
-
-
-
-/*  <---- Gallery ---->  */
-(isset($_GET['page']) && $_GET['page'] == "contact") ? 
-include('includes/page/contact.php') : '';
-/*  <---- Gallery END ---->  */
-
+		
+		/*  <---- Calendar ---->  */
+		case 'calendar':
+			include('includes/page/calendar.php');
+		break;
+		
+		
+		/*  <---- Forum ---->  */
+			// The forum is accessed via link to another directory, so just abort and display the portal.
+			//include('includes/modules/wip_page.php');
+		
+		
+		/*  <---- Aboutus ---->  */
+		case 'aboutus':
+			include('includes/page/aboutus.php');
+		break;
+		
+		
+		/*  <---- Contact ---->  */
+		case 'contact':
+			include('includes/page/contact.php');
+		break;
+		
+		/*  <---- Boos Calculator ---->  */
+		case 'bosscalc':
+			include('includes/page/bosshealthcalc.php');
+		break;
+		
+		
+		/*  <---- Portal as default ---->  */
+		default:
+			include('includes/page/home.php');
+		break;
+	}
+}
+else
+	include('includes/page/home.php');
 ?>

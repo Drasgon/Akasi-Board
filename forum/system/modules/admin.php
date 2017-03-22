@@ -1,8 +1,20 @@
 <?php
-ini_set('display_startup_errors',1);
-ini_set('display_errors',1);
-error_reporting(-1);
+/*
+Copyright (C) 2016  Alexander Bretzke
 
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 if (!isset($db) || $db == NULL)
 {
@@ -13,7 +25,31 @@ if (!isset($main) || $main == NULL)
 	$main = new Board($db, $connection);
 
 $main->useFile('./system/classes/akb_admin.class.php');
+$main->useFile('./system/interface/errorpage.php', 1);
 $admin = new Admin($db, $connection);
+
+	ini_set('display_startup_errors',1);
+	ini_set('display_errors',1);
+	error_reporting(-1);
+	
+	if(!$main->checkSessionAccess('MOD'))
+	{
+		throwError('Sie haben leider nicht die notwendigen Zugriffsrechte, um diese Seite zu besuchen.');
+
+		return;
+	}
+
+
+	// STRUCTURE: DisplayName => ((LinkName[AdditionalNameCase, *, * . . .]), id)
+	$links = ARRAY(
+		'Accounts' => ARRAY(ARRAY('Accounts', 'Verify'), 'navMembers'),
+		'Chat' => ARRAY(ARRAY('Chat'), 'profiledit'),
+		'Board' => ARRAY(ARRAY('Board'), 'navForum'),
+		'Themen' => ARRAY(ARRAY('Threads'), 'thread_def'),
+		'Sitzungen' => ARRAY(ARRAY('Sessions'), 'refresh'),
+		'Funktionen' => ARRAY(ARRAY('Functions'), 'accountpanel'),
+		'TeamSpeak 3' => ARRAY(ARRAY('TeamSpeak'), 'adminicon'),
+	);
 ?>
 
 <link rel=stylesheet href="./css/akb-style-admin.css" media="screen">
@@ -25,221 +61,59 @@ $admin = new Admin($db, $connection);
 		</div>
 		<div class="adminSidebar_list">
 			<ul>
-				<li id="navMembers" class="active">
-					<a href="#">
-						<p>
-							Accounts
-						</p>
-					</a>
-				</li>
-				<li id="profiledit">
-					<a href="#">
-						<p>
-							Chat
-						</p>
-					</a>
-				</li>
-				<li id="navForum">
-					<a href="#">
-						<p>
-							Board
-						</p>
-					</a>
-				</li>
-				<li id="thread_def">
-					<a href="#">
-						<p>
-							Themen
-						</p>
-					</a>
-				</li>
-				<li id="refresh">
-					<a href="#">
-						<p>
-							Sitzungen
-						</p>
-					</a>
-				</li>
+				<?php
+					$links_html = '';
+					$class_name = 'class="active"';
+
+					foreach($links as $key => $value)
+					{
+						
+						
+						if(isset($_GET['page']) && $_GET['page'] == 'Admin' && isset($_GET['Tab']) && in_array($_GET['Tab'], $value[0]))
+							$class = $class_name;
+						else
+							$class = '';
+						
+						$links_html .= '
+							<li id="'.$value[1].'" '.$class.'>
+								<a href="?page=Admin&Tab='.$value[0][0].'">
+									<p>
+										'.$key.'
+									</p>
+								</a>
+							</li>
+						';
+					}
+					
+					echo $links_html;
+				?>
 			</ul>
 		</div>
 	</div>
 	<div class="adminContainer">
-		<form method="POST" action="?page=Admin&action=editUsers" id="adminForm">
-			<div class="adminNav">
-				<ul>
-					<li id="close">
-						<a onclick="document.forms['adminForm'].submit('ban');">
-							<p>
-								Nutzer sperren
-							</p>
-						</a>
-					</li>
-					<li id="accept">
-						<a onclick="document.forms['adminForm'].submit('grant');">
-							<p>
-								Nutzer freischalten
-							</p>
-						</a>
-					</li>
-					<li id="contact">
-						<a onclick="document.forms['adminForm'].submit('edit');">
-							<p>
-								Accounts bearbeiten
-							</p>
-						</a>
-					</li>
-					<li id="remove">
-						<a onclick="document.forms['adminForm'].submit('remove');">
-							<p>
-								Accounts entfernen
-							</p>
-						</a>
-					</li>
-				</ul>
-			</div>
-			<div class="adminContent">
-				<div class="adminContentHeader">
-				  <h2 class="fancy_font">
-					Actual Setting
-				  </h2>
-				</div>
-				<table class="akb-thead">
-					<thead>
-						<tr>
-							<th>
-							</th>
-							<th>
-								<div>
-									Benutzername
-								</div>
-							</th>
-							<th>
-								<div>
-									Avatar
-								</div>
-							</th>
-							<th>
-								<div>
-									Registriert am
-								</div>
-							</th>
-							<th>
-								<div>
-									Beiträge
-								</div>
-							</th>
-							<th>
-								<div>
-									Hobbys
-								</div>
-							</th>
-							<th>
-								<div>
-									Geburtstag
-								</div>
-							</th>
-							<th>
-								<div>
-									Letzte Aktivität
-								</div>
-							</th>
-							<th>
-								<div>
-									Wohnort
-								</div>
-							</th>
-						</tr>
-					</thead>
-			
-					<tbody>
-					<?php
-					$membersRow='';
+		<?php
+			if(isset($_GET['page']) && $_GET['page'] == 'Admin')
+			{
+				$tab = (isset($_GET['Tab'])) ? $_GET['Tab'] : $links['Accounts'][0][0];
+				
+				switch($tab)
+				{
+					case 'Verify':
+					case 'Accounts':
 					
-					$getmembers = $db->query("SELECT id, registered_date FROM $db->table_accounts WHERE accepted=1 ORDER BY id ASC LIMIT 0, 30");
-						while($members = mysqli_fetch_object($getmembers)) {
-							$memberID = $members->id;
-							$memberDate = $members->registered_date;
-						
-						$getuser = $db->query("SELECT username, gender, avatar, post_counter, user_title, user_rank, location FROM $db->table_accdata WHERE account_id=('".$memberID."')");
-							$user = mysqli_fetch_object($getuser);
-								$memberName = $user->username;
-								$memberGender = $user->gender;
-								$memberAvatar = $user->avatar;
-								$memberPosts = $user->post_counter;
-								$memberTitle = $user->user_title;
-								$memberRank = $user->user_rank;
-								
-								
-						$get_profile_data = $db->query("SELECT location, hobbies FROM $db->table_profile WHERE id=('".$memberID."')");
-							if(mysqli_num_rows($get_profile_data) >= 1)
-							{
-								$profiledata = mysqli_fetch_object($get_profile_data);
-									
-									$memberLocation = $profiledata->location;
-							}	
-								if(!isset($memberLocation) || empty($memberLocation))
-									$memberLocation = 'n.a';
-							
-							
-						$getuserActivity = $db->query("SELECT last_activity, online FROM $db->table_sessions WHERE id=('".$memberID."')");
-							while($useractivity = mysqli_fetch_object($getuserActivity)) {
-								$memberActivity = $useractivity->last_activity;
-								$memberOnline = $useractivity->online;
-							}
-							
-					$memberDate 	= $main->convertTime($memberDate);
-					$memberActivity = $main->convertTime($memberActivity);
-					
-					if($memberOnline == '0') { $userStatusImg = '<div class="icons_small" id="offline" title="'.$memberName.' ist grade offline"></div>'; }
-					else { $userStatusImg = '<div class="icons_small" id="online" title="'.$memberName.' ist grade online"></div>'; }
-					
-					$membersRow .='
-						<tr class="members_row smoothTransitionFast">
-							<td class="columnCheckbox">
-								<input type="checkbox" value="'.$memberID.'" name="userSelect">
-							</td>
-							<td class="columnUsername">
-								<div class="user_onlineStatus">
-									'.$userStatusImg.'
-								</div>
-								<div>
-									<p>
-										<a href="?page=Profile&User='.$memberID.'">'.$memberName.'</a>
-									</p>
-									<p>
-										'.$memberTitle.'
-									</p>
-								</div>
-							</td>
-							<td class="columnAvatar">
-								<img src="'.$memberAvatar.'">
-							</td>
-							<td class="columnRegistered">
-								'.$memberDate.'
-							</td>
-							<td class="columnPosts">
-								'.$memberPosts.'
-							</td>
-							<td class="columnHobbies">
-								n.A
-							</td>
-							<td class="columnBirthday">
-								n.A
-							</td>
-							<td class="columnLastActivity">
-								'.$memberActivity.'
-							</td>
-							<td class="columnLocation">
-								'.$memberLocation.'
-							</td>
-						</tr>';
-						}
-						
-						echo $membersRow;
-					?>
-					</tbody>
-				</table>
-			</div>
-		</form>
+							$main->useFile('./system/modules/AdminPage/accounts.php');
+					break;
+					case 'Functions':
+							$main->useFile('./system/modules/AdminPage/functions.php');
+					break;
+					case 'TeamSpeak':
+							$main->useFile('./system/modules/AdminPage/teamspeak.php');
+					break;
+					case 'Threads':
+							$main->useFile('./system/modules/AdminPage/threads.php');
+					break;
+				}
+			}
+		?>
 	</div>
 </div>

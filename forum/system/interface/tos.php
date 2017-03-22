@@ -77,9 +77,11 @@ komplette Sperrung des Zugangs zum Forum.
 <br>
 1. Dieser Vertrag wird auf unbestimmte Zeit geschlossen.
 <br>
-2. Ohne Einhaltung einer Frist, können beide Parteien diese Vereinbarung jederzeit kündigen.
+2. Dieser Vertrag wird beendet, sobald ein Nutzer aus der Ingame Gilde Austritt oder Entfernt wird.
 <br>
-3. Nach Beendigung dieses Vertrags ist der Anbieter dazu berechtigt, den Zugang des Nutzers jederzeit zu sperren, ist aber nicht dazu verpflichtet, im Falle einer Vertragsbeendigung die von Ihnen erstellten Inhalte zu löschen. Ein Anspruch auf von Ihnen als Nutzer auf Überlassung der erstellten Inhalte wird ausgeschlossen.
+3. Ohne Einhaltung einer Frist, können beide Parteien diese Vereinbarung jederzeit kündigen.
+<br>
+4. Nach Beendigung dieses Vertrags ist der Anbieter dazu berechtigt, den Zugang des Nutzers jederzeit zu sperren, ist aber nicht dazu verpflichtet, im Falle einer Vertragsbeendigung die von Ihnen erstellten Inhalte zu löschen. Ein Anspruch auf von Ihnen als Nutzer auf Überlassung der erstellten Inhalte wird ausgeschlossen.
 <br>
 <br>
 <br>

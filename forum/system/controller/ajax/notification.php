@@ -2,9 +2,9 @@
 
 	session_start();
 	
-	ini_set('display_startup_errors',1);
-	ini_set('display_errors',1);
-	error_reporting(-1);
+	ini_set('display_startup_errors',0);
+	ini_set('display_errors',0);
+	error_reporting(0);
 
 	// Re initialize the Board class
 	if(!isset($db) || $db = NULL)
@@ -21,6 +21,8 @@
 		$main         = new Board($db, $connection);
 	}
 	
+	$ajaxStatus = true;
+	
 	$main->useFile('./system/auth/auth.php');
 
 
@@ -33,22 +35,26 @@
 	
 	// PROCESSING START
 
-		$db->query("UPDATE $db->table_sessions SET last_activity=('".$last_acTime."') WHERE sid = ('".$_SESSION['ID']."')");
+		// $db->query("UPDATE $db->table_sessions SET last_activity=('".$last_acTime."') WHERE sid = ('".$_SESSION['ID']."')");
 
 		while ($messages = mysqli_fetch_object($getMsg)) {
 			
 			$id        = $messages->id;
 			$thread_id = $messages->thread_id;
 			$author_id = $messages->author_id;
-			$text      = $messages->text;
+			$text      = preg_replace("/<.*?>/", " ", $messages->text);
 			
-			$checksubStatus = $db->query("SELECT sub_id,user_id,thread_id FROM $db->table_subdata WHERE thread_id=('" . $thread_id . "') AND user_id=('" . $_SESSION['userid'] . "')");
+			$checksubStatus = $db->query("SELECT sub_id,user_id,thread_id FROM $db->table_subdata WHERE thread_id=('" . $thread_id . "') AND user_id=('" . $_SESSION['USERID'] . "')");
 			
 			if (mysqli_num_rows($checksubStatus) != 0) {
-				$checkRequestStatus = $db->query("SELECT request_id,user_id,thread_id, last_post FROM $db->table_msg_request WHERE thread_id=('" . $thread_id . "') AND user_id=('" . $_SESSION['userid'] . "')");
+				$checkRequestStatus = $db->query("SELECT request_id,user_id,thread_id, last_post FROM $db->table_msg_request WHERE thread_id=('" . $thread_id . "') AND user_id=('" . $_SESSION['USERID'] . "')");
 				
-					$data = mysqli_fetch_object($checkRequestStatus);
-					$last_post = $data->last_post;
+					if($data = mysqli_fetch_object($checkRequestStatus))
+					{
+						$last_post = $data->last_post;
+					}
+					else
+						$last_post = -1;
 
 						if (mysqli_num_rows($checkRequestStatus) == 0 || (mysqli_num_rows($checkRequestStatus) == 1 && $last_post != $id))
 						{
@@ -57,7 +63,7 @@
 							
 							while ($authorInfo = mysqli_fetch_object($get_authorInfo)) {
 								$author       = $authorInfo->username;
-								$authorAvatar = $authorInfo->avatar;
+								$authorAvatar = $main->checkUserAvatar($authorInfo->avatar);
 								
 								
 								$get_threadData = $db->query("SELECT title FROM $db->table_thread WHERE id=('" . $thread_id . "')");
@@ -80,9 +86,9 @@
 							echo json_encode($msgResult);
 							
 							if(mysqli_num_rows($checkRequestStatus) == 0)
-								$db->query("INSERT INTO $db->table_msg_request (user_id, thread_id, last_post) VALUES (('" . $_SESSION['userid'] . "'),('" . $thread_id . "'), ('" . $id . "'))");
+								$db->query("INSERT INTO $db->table_msg_request (user_id, thread_id, last_post) VALUES (('" . $_SESSION['USERID'] . "'),('" . $thread_id . "'), ('" . $id . "'))");
 							else
-								$db->query("UPDATE $db->table_msg_request SET last_post = ('" . $id . "') WHERE thread_id=('" . $thread_id . "') AND user_id=('" . $_SESSION['userid'] . "')");
+								$db->query("UPDATE $db->table_msg_request SET last_post = ('" . $id . "') WHERE thread_id=('" . $thread_id . "') AND user_id=('" . $_SESSION['USERID'] . "')");
 						}
 
 			}

@@ -16,22 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	ini_set('display_startup_errors',1);
-	ini_set('display_errors',1);
-	error_reporting(-1);
-
 class Database
 
   {
 
   // DB CONFIG
 
-  private $db_user = 'root';
-  private $db_pwd  = '';
-  private $db_host = '127.0.0.1';
+  private $db_user = 'ni204675_1sql3';
+  private $db_pwd  = 'asas78astzda80sud9asdjalsdhaklsdh';
+  private $db_host = 'vweb17.nitrado.net';
   private $db_port = '3306';
-  private $db_name = 'ian_forumcms';
+  private $db_name = 'ni204675_1sql3';
   private $db_charset = 'utf8';
+  private $db_use_port = FALSE;
 
   // CLASS CONFIG
 
@@ -44,6 +41,8 @@ class Database
 
   private $showErrors = 1;
   private $devMode = true;
+  
+  public $link = NULL;
   
   // Error Numbers
   
@@ -87,6 +86,7 @@ class Database
   public $table_user_rank		= 'akb_user_rank';
   public $table_user_rank_status= 'akb_user_rank_data';
   public $table_portal_news 	= 'akb_portal_data';
+  public $table_protection_logs	= 'akb_protection_system_logs';
   public $table_profile 		= 'akb_account_data_profile';
   public $table_ban 			= 'akb_account_ban';
   public $table_blocked_ip		= 'akb_blocked_ip';
@@ -94,6 +94,10 @@ class Database
   public $table_gallery_thumb	= 'akb_gallery_data_thumb';
   public $table_gallery_comments= 'akb_gallery_comments';
   public $table_gallery_directory= 'akb_gallery_temp';
+  public $table_survey			= 'akb_survey';
+  public $table_survey_data		= 'akb_survey_data';
+  public $table_security_data	= 'akb_securitydata';
+  public $table_securityquestions= 'akb_securityquestions';
 
   
   public function __construct()
@@ -115,7 +119,7 @@ class Database
 		
 		if(get_class($globalLink) == 'Database')
 		{
-			$globalLink = new mysqli($this->db_host . ':' . $this->db_port, $this->db_user, $this->db_pwd, $this->db_name);
+			$globalLink = new mysqli($this->db_host, $this->db_user, $this->db_pwd, $this->db_name, $this->db_port);
 			if (!$globalLink) $this->mysqli_db_error('Database connect failed', 'One of the given values is incorrect', $this->mysql_errors["login"]);
 			else
 			{
@@ -126,6 +130,7 @@ class Database
 				
 				//echo round((microtime(TRUE) - $start) * 1000, 3).'<br>';
 				
+				// var_dump(get_object_vars($globalLink));
 				
 				return $globalLink;
 			}
@@ -135,9 +140,18 @@ class Database
 			return $this->link = $globalLink;
 		}
     }
+		
+		
+  // Get affected Rows in last query
+  
+  public function get_affected_rows()
+  {
+		return mysqli_affected_rows($this->link);
+  }
 
   // Set Database charset
 
+  
   public function set_db_charset()
     {
 		if ($this->db_charset != "") $this->setCharset = mysqli_set_charset($this->link, $this->db_charset);
@@ -146,12 +160,14 @@ class Database
 	
   // Execute Queries (For better control and logging)
 	
+	
   public function query($queryString)
 	{
 		global $totalQueries, $totalQueryTime;
 		$start = microtime(true);
 		
-		$queryExecution = mysqli_query($this->link, $queryString) or die($this->mysqli_db_error($this->queryErrorMessage, "An error occured while executing the database query.", $this->mysql_errors["query"], $queryString));
+		if(!$queryExecution = mysqli_query($this->link, $queryString))
+			$this->mysqli_db_error($this->queryErrorMessage, "An error occured while executing the database query.", $this->mysql_errors["query"], $queryString);
 
 		$end = microtime(true);
 		$totalQueryTime = $totalQueryTime + ($end - $start);
@@ -164,6 +180,13 @@ class Database
 	
   public function mysqli_db_error($errormsg, $error_reason = "", $error_number = "", $query_string = "")
     {
+		if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
+		{
+			echo '<span class="error">Es ist ein schwerwiegender Fehler aufgetreten!</span>';
+			
+			exit();
+		}
+	
 		$this->errdesc = mysqli_error($this->link);
 		if(empty($error_number))
 		{
@@ -178,16 +201,12 @@ class Database
 		$trace = debug_backtrace();
 		$caller = array_shift($trace);
 		
-		if($error_number != 121)
-		{
 			$scriptName = basename($caller['file']);
 			$lineNumber = $caller['line'];
-		}
-		else
-		{
-			$scriptName = basename($trace[1]['file']);
-			$lineNumber = $trace[1]['line'];
-		}
+			
+			$scriptName .= ', ' . basename($trace[1]['file']);
+			$lineNumber .= ', ' . $trace[1]['line'];
+
 		
 		if(!isset($this->link))
 			$error_reason = 'Es konnte/wurde keine Datenbank Verbindung aufgebaut (werden).';

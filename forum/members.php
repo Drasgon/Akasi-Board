@@ -93,14 +93,25 @@ if (!isset($main) || $main == NULL)
 				$memberID = $members->id;
 				$memberDate = $members->registered_date;
 			
-			$getuser = $db->query("SELECT username, gender, avatar, post_counter, user_title, user_rank, location FROM $db->table_accdata WHERE account_id=('".$memberID."')");
-				$user = mysqli_fetch_object($getuser);
-					$memberName = $user->username;
-					$memberGender = $user->gender;
-					$memberAvatar = $user->avatar;
-					$memberPosts = $user->post_counter;
-					$memberTitle = $user->user_title;
-					$memberRank = $user->user_rank;
+			$getuser = $main->getUserdata($memberID, "account_id");
+					$memberName = $getuser['name'];
+					$memberGender = $getuser['gender'];
+					$memberAvatar = $main->checkUserAvatar($getuser['avatar']);
+					$memberAvatar_border = $getuser['avatar_border'];
+					$memberPosts = $getuser['posts'];
+					$memberTitle = $getuser['title'];
+					$memberRank = $getuser['rank'];
+					
+					$level_bg = '';
+					
+					if($main->getAccountSecurity($memberID) == 2)
+					{
+						$level_bg = 'accLevelBackgroundBlue';
+					}
+					if($main->getAccountSecurity($memberID) == 3)
+					{
+						$level_bg = 'accLevelBackgroundRed';
+					}
 					
 					
 			$get_profile_data = $db->query("SELECT location, hobbies FROM $db->table_profile WHERE id=('".$memberID."')");
@@ -115,19 +126,18 @@ if (!isset($main) || $main == NULL)
 				
 				
 			$getuserActivity = $db->query("SELECT last_activity, online FROM $db->table_sessions WHERE id=('".$memberID."')");
-				while($useractivity = mysqli_fetch_object($getuserActivity)) {
+				$useractivity = mysqli_fetch_object($getuserActivity);
 					$memberActivity = $useractivity->last_activity;
 					$memberOnline = $useractivity->online;
-				}
 				
 		$memberDate 	= $main->convertTime($memberDate);
 		$memberActivity = $main->convertTime($memberActivity);
 		
-		if($memberOnline == '0') { $userStatusImg = '<div class="icons_small" id="offline" title="'.$memberName.' ist grade offline"></div>'; }
-		else { $userStatusImg = '<div class="icons_small" id="online" title="'.$memberName.' ist grade online"></div>'; }
+		if($memberOnline == '0') { $userStatusImg = '<div class="red_circle_small" title="'.$memberName.' ist grade offline"></div>'; }
+		else { $userStatusImg = '<div class="green_circle_small" title="'.$memberName.' ist grade online"></div>'; }
 		
 		$membersRow .='
-			<tr class="members_row smoothTransitionFast">
+			<tr class="members_row smoothTransitionFast '.$level_bg.'">
 				<td class="columnUsername">
 					<div class="user_onlineStatus">
 						'.$userStatusImg.'
@@ -142,7 +152,7 @@ if (!isset($main) || $main == NULL)
 					</div>
 				</td>
 				<td class="columnAvatar">
-					<img src="'.$memberAvatar.'">
+					<img src="'.$memberAvatar.'" class="user_avatar_global_border img-zoom" style="border:5px solid rgba('.$memberAvatar_border.')!important">
 				</td>
 				<td class="columnRegistered">
 					'.$memberDate.'

@@ -25,18 +25,14 @@ if (!isset($db) || $db == NULL)
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
     echo '<meta http-equiv="refresh" content="0;url=/">';
 } else {
     
-    if (isset($_GET['action']) && $_GET['action'] == 'formsubmit') {
-        $main->useFile('./system/controller/sessions/login_ext.php');
-        $login_data = login_extended();
-    }
-    
+
     $login_page_container = '';
     
-    if (!isset($login_data) || (isset($login_data) && $login_data['successStatus'] == '0')) {
+
         
         $login_page_container .= '
 
@@ -48,32 +44,35 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
    </div>
 </div>';
         
-        if (isset($login_data) && !empty($login_data['errorStatus'])) {
-            $login_page_container .= '<p class="error loginError_external">' . $login_data["externalMsg"] . '</p>';
-        }
-        
-        $login_page_container .= '
-<form class="registerMain login_page" method="POST" action="?page=Login&amp;action=formsubmit">
+			
+            echo '<p class="error loginError_external">';
+
+        	if (isset($_GET['action']) && $_GET['action'] == 'formsubmit')
+				$main->useFile('./system/controller/sessions/login.php');
+
+        $login_page_container .= '</p>
+		
+<form class="registerMain login_page no-smoothstate" method="POST" action="?page=Login&action=formsubmit">
   <div class="login_container">
    <div class="Container_reg">
    <div class="login_input_con">
       <div class="formField_label">
-         <label for="username_login">
+         <label for="username">
          Benutzername
          </label>
       </div>
       <div class="reg_containerInput">
-         <input type="text" name="username_login" value="" id="username_login" class="registerInputField">
+         <input type="text" name="username" value="" id="username" class="registerInputField">
       </div>
 	</div>
 	<div class="login_input_con">
       <div class="formField_label">
-         <label for="password_login">
+         <label for="password">
          Passwort
          </label>
       </div>
       <div class="reg_containerInput">
-         <input type="password" name="password_login" value="" id="password_login" class="registerInputField">
+         <input type="password" name="password" value="" id="password" class="registerInputField">
       </div>
 	</div>
    </div>
@@ -94,8 +93,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
    </div>
   </div>
 </form>';
-        
-    }
+       
     
     if (isset($login_data) && $login_data['successStatus'] == true) {
         require('./system/interface/successpage_login.php');

@@ -45,7 +45,7 @@ if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted')
 {
 	if ($_COOKIE['PHPSESSID'] == '0')
 	{
-		$_SESSION['angemeldet'] = false;
+		$_SESSION['STATUS'] = false;
 		setcookie('PHPSESSID', '', time() - 3600);
 		return;
 	}
@@ -57,11 +57,11 @@ if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted')
 		if (mysqli_num_rows($checkUserbyQuery) == 0 || mysqli_num_rows($checkUserbyQuery) > 1)
 		{
 			setcookie('PHPSESSID', '', time() - 3600);
-			$_SESSION['angemeldet'] = false;
+			$_SESSION['STATUS'] = false;
 		}
 		else
 		{
-			$_SESSION['angemeldet'] = true;
+			$_SESSION['STATUS'] = true;
 			require ('../security/permission_system.php');
 			while($ownID = mysqli_fetch_object($checkUserbyQuery))
 			{
@@ -75,7 +75,7 @@ if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted')
 }
 else
 {
-	$_SESSION['angemeldet'] = false;
+	$_SESSION['STATUS'] = false;
 }
 
 
@@ -85,7 +85,7 @@ if(isset($_POST['galleryPage']) && isset($_POST['type']) && $_POST['type'] == 'c
 	$value = mysqli_real_escape_string($connection, $_POST['value']);
 	$imageId = mysqli_real_escape_string($connection, $_POST['galleryPage']);
 	
-	$userId   = $_SESSION['userid'];
+	$userId   = $_SESSION['USERID'];
 	
 	$imgData = $gallery->imageData($imageId, "id");
 	$imgOwner = $imgData['uploaded_by_id'];

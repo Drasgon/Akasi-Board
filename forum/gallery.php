@@ -62,12 +62,12 @@ if (!isset($_GET['action'])) {
 </div>
 <div class="contentHeader">';
         // Only show upload button and form, if logged in
-        if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+        if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
             $gallery_header .= '
 	<div class="largeButtons">
 		<ul>
 			<li>
-				<a id="submitImage" title="Bild hochladen">
+				<a id="submitImage" title="Bild hochladen" class="no-smoothstate">
 					<div class="icons" id="upload"></div>
 					<span>
 						Bild hochladen
@@ -84,10 +84,11 @@ if (!isset($_GET['action'])) {
 			</span>
 		</div>
 		<div class="uploadForm_content">
-		<form method="POST" action="?page=Gallery&action=submitImage" enctype="multipart/form-data" id="galleryUploadForm">
+		<form enctype="multipart/form-data" method="POST" action="?page=Gallery&action=submitImage" id="galleryUploadForm" class="no-smoothstate">
 				<span>Die maximale Uploadgröße beträgt 5MB</span>
-				<input type="file" name="image" id="file" accept="image/*" onchange="updateImage(this)"><br>
-				<input type="submit" value="Weiter" id="imageUploadContinue" disabled="1">
+				<input type="file" name="image" id="file" accept="image/*" onchange="updateImage(this)" /><br>
+				<!--<input type="hidden" name="test" value="FILEINPT" />-->
+				<input type="submit" value="Weiter" id="imageUploadContinue" disabled="1" />
 		</form>
 		<img id="uploadPreview">
 		</div>
@@ -239,7 +240,7 @@ if (!isset($_GET['action'])) {
         $image_upload_time = $main->convertTime($image_upload_time);
         
         if (isset($_SESSION['ID'])) {
-            $userid   = $_SESSION['userid'];
+            $userid   = $_SESSION['USERID'];
             
             
             if ($image_uploader_id == $userid) {

@@ -20,10 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 MESSAGE HANDLE SYSTEM
 */
 
-ini_set('display_startup_errors',1);
-ini_set('display_errors',1);
-error_reporting(-1);
-
 require('../../classes/akb_mysqli.class.php');
 require('../../classes/akb_main.class.php');
 
@@ -44,7 +40,7 @@ if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted')
 {
 	if ($_COOKIE['PHPSESSID'] == '0')
 	{
-		$_SESSION['angemeldet'] = false;
+		$_SESSION['STATUS'] = false;
 		setcookie('PHPSESSID', '', time() - 3600);
 		return;
 	}
@@ -56,11 +52,11 @@ if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted')
 		if (mysqli_num_rows($checkUserbyQuery) == 0 || mysqli_num_rows($checkUserbyQuery) > 1)
 		{
 			setcookie('PHPSESSID', '', time() - 3600);
-			$_SESSION['angemeldet'] = false;
+			$_SESSION['STATUS'] = false;
 		}
 		else
 		{
-			$_SESSION['angemeldet'] = true;
+			$_SESSION['STATUS'] = true;
 			$main->useFile('./system/controller/security/permission_system.php');
 			while($ownID = mysqli_fetch_object($checkUserbyQuery))
 			{
@@ -73,16 +69,14 @@ if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted')
 }
 else
 {
-	$_SESSION['angemeldet'] = false;
+	$_SESSION['STATUS'] = false;
 }
 
 $main->useFile('./system/classes/akb_chat.class.php');
 $chat = new Chat($db, $connection, $main);
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true)
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true)
 {
-	setlocale(LC_ALL, null);
-	setlocale(LC_ALL, 'de_DE@euro', 'de_DE', 'deu_deu');
 
 	/*
 	MESSAGE SEND HANDLER BEGIN
@@ -169,7 +163,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true)
 			$newChatRow.= '<div class="chatRow '.$stringInsert.'" id="' . $rowID . '">
   <div class="chatRow_container">
   <div><a href="?page=Profile&amp;User=' . $user_posted_id . '"><b>' . $username . '</b></a>
-  <img src="'.$useravatar.'">
+  <img src="'.$useravatar.'" class="img-zoom">
     </div>
   </div>
   	<div class="chat_mainMsg">

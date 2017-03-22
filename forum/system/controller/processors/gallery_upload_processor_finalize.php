@@ -32,13 +32,34 @@ if (!isset($main) || $main == NULL)
 if (!isset($gallery) || $gallery == NULL)
     $gallery = new Gallery($db, $connection);
 
+$main->useFile('./system/interface/successpage.php', 1);
+$main->useFile('./system/interface/errorpage.php', 1);
+
+$refererLink = '?page=Gallery';
+$metaRefresh = '<meta http-equiv="refresh" content="3" url="'.$refererLink.'">';
 
 /*****
  * Initialize the last processing steps.
  * Move image to public directory.
  * The image name is UNIQUE, so there's no danger to use it.
  ******/
-$imageName = $gallery->getLastUploaded($main->getUserId());
+$imageName = $gallery->getLastUploaded($main->getUserId(), "img_name");
+
+/*****
+ * Check if all the needed information is given. If not, cancel the process.
+ ******/
+if((!isset($_POST['image_title']) || (isset($_POST['image_title']) && $_POST['image_title'] == ''))
+		||
+		(!isset($_POST['image_theme']) || (isset($_POST['image_theme']) && $_POST['image_theme'] == ''))
+		||
+		(!isset($_POST['image_rating']) || (isset($_POST['image_rating']) && $_POST['image_rating'] == ''))
+		||
+		(!isset($_POST['image_category']) || (isset($_POST['image_category']) && $_POST['image_category'] == '')))
+	{
+		throwError("Sie haben nicht alle benötigten Informationen angegeben!", '?page=Gallery&action=submitImage');
+		
+		return;
+	}
 
 $imageTitle = mysqli_real_escape_string($connection, $_POST['image_title']);
 $imageDesc = mysqli_real_escape_string($connection, $_POST['image_desc']);
@@ -49,6 +70,8 @@ $imageCategory = mysqli_real_escape_string($connection, $_POST['image_category']
 $publish = $gallery->publishImage($imageName, $imageTitle, $imageDesc, $imageTheme, $imageRating, $imageCategory);
 
 if($publish)
-echo "Bild wurde erfolgreich veröffentlicht!";
-echo '<meta http-equiv="refresh" content="3; url=?page=Gallery">';
+	throwSuccess("Bild wurde erfolgreich veröffentlicht!", $refererLink);
+else
+	throwError("Fehler bei der Veröffentlichung des Bildes!", $refererLink);
+
 ?>

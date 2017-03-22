@@ -1,4 +1,36 @@
-body { background-color: #1D1D1D; text-shadow: -1px -1px #050505; color: #ACACAC; }
-.main { position: absolute; top: 40%; left: 50%; width: 1100px; height: 400px; margin-top: -150px; margin-left: -555px; border-radius: 5px; border: 1px solid #707070; background-color: #525252; -webkit-box-shadow: 3px 3px 6px #888; box-shadow: 3px 3px 6px #222; opacity:.95; }
-.error { text-decoration: underline; vertical-align: middle; font-family: 'Arial',Helvetica; }
-.text { vertical-align: middle; font-family: 'Arial',Helvetica; }
+body {
+    background-color: #215A2E;
+    text-shadow: -1px -1px #050505;
+    color: #ACACAC;
+}
+
+a {
+    color:#DFD;
+}
+
+.main {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: 1100px;
+    height: 400px;
+    margin-top: -150px;
+    margin-left: -555px;
+    border-radius: 5px;
+    border: 3px inset rgba(100,154,125,0.54);
+    background-color: rgb(16,56,10);
+    -webkit-box-shadow: 3px 3px 6px #888;
+    box-shadow: inset 3px 3px 6px rgba(34,34,34,0.44);
+    opacity: 0.95;
+}
+
+.error {
+    text-decoration: underline;
+    vertical-align: middle;
+    font-family: 'Arial',Helvetica;
+}
+
+.text {
+    vertical-align: middle;
+    font-family: 'Arial',Helvetica;
+}

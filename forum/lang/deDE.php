@@ -47,7 +47,7 @@ $langGlobal['max_users_reached_string_first'] = 'Die maximal zugelassene Anzahl 
 $langGlobal['max_users_reached_string_sec']   = ' ) wurde erreicht oder überschritten. Weitere Logins sind zurzeit nicht möglich, versuchen Sie es später erneut.';
 $langGlobal['username_illegal_chars']         = 'Username enthält ungültige Zeichen.';
 $langGlobal['invalid_pass_or_username']       = 'Ungültiger Username oder Passwort';
-$langGlobal['account_not_validated']          = 'Dieser Account wurde noch nicht von der Administration freigeschaltet.';
+$langGlobal['account_not_validated']          = 'Dieser Account wurde noch nicht verifiziert. Überprüfen Sie ihr E-Mail Postfach, oder wenden Sie sich an die Administration!';
 $langGlobal['account_ban_temp_first']         = 'Dieser Account ist bis ';
 $langGlobal['account_ban_temp_time_first']	  = 'zum ';
 $langGlobal['account_ban_temp_second']        = ' gesperrt.';
@@ -69,13 +69,14 @@ $langGlobal['portal_lang_new_members']		= 'Neue Mitglieder';
 $langGlobal['portal_lang_news']				= 'Neuigkeiten';
 $langGlobal['portal_lang_friends']			= 'Freunde';
 $langGlobal['portal_lang_functions']		= 'Funktionen';
+$langGlobal['portal_survey_headline']		= 'Umfrage';
 
 $langGlobal['gallery_lang_welcome']			= 'Willkommen in der Galerie! Hier können Sie Bilder mit anderen Nutzern teilen, diese Bewerten, Kommentieren und vieles mehr!';
 
 $langGlobal['string_informations'] 			= 'Informationen';
 
 $langGlobal['no_thread_display']			= 'Es stehen keine Themen zur Anzeige zur Verfügung.';
-$langGlobal['most_recent_replies']			= 'Die neuesten beiträge';
+$langGlobal['most_recent_replies']			= 'Die neuesten Beiträge';
 $langGlobal['thread']						= 'Thema';
 $langGlobal['thread_rating']				= 'Bewertung';
 $langGlobal['thread_replies']				= 'Antworten';

@@ -16,6 +16,104 @@ of the author.
 */
 console.log("Cookies Enabled: " + navigator.cookieEnabled);
 
+var functions = [
+	"logoutFrame",
+	"loginFrame",
+	"loginFrameDrag",
+	"clearAllChatTimers",
+	"registerVariousEvents",
+	"chatMsgField",
+	"imageZoom",
+	"boardCategoryToggle",
+	"clearThreadSaveInterval",
+	"clearPostSaveInterval",
+	"galleryPageSwitch",
+	"galleryInformationSelect",
+	"fixDiv"
+];
+
+function iterateFuncs()
+{
+	for(var value of functions)
+	{
+		if($.isFunction(window[value]))
+		{
+			// console.log("Calling: " + value);
+			window[value]();
+		}
+	}
+}
+
+$(document).ready(function() {
+	iterateFuncs();
+	
+	// login();
+});
+
+
+  function fixDiv() {
+	  console.log("FIX");
+	$(window).on('scroll', function () {
+			
+		
+		var $cache = $('.infoline_header');
+		if ($(window).scrollTop() > 365)
+		{
+			$('.infoline_header').addClass("infoline_header_fixed");
+			
+			  $cache.css({
+				'position': 'fixed',
+				'top': '0px'
+			  });
+		}
+		else
+		{
+			$('.infoline_header').removeClass("infoline_header_fixed");
+			
+			  $cache.css({
+				'position': 'absolute',
+				'top': '260px'
+			  });
+			  
+			  /*$('.infoline_header').animate({
+					background: "rgba(167, 160, 33, 0.49)"
+				});*/
+		}
+	});
+  }
+
+function logoutFrame()
+{
+		var b = $("#LogoutOverlay"),
+			a = $("#logoutPanel");
+		$(".logout_servicepanel a:first-child").click(function(c) {
+			b.fadeIn(500);
+			a.fadeIn(500);
+			$("html, body").css({
+				overflow: "show",
+				height: "100%"
+			})
+		});
+		$(".close").click(function(a) {
+			b.fadeOut(300)
+		});
+		$(document).mouseup(function(c) {
+			a.is(c.target) || 0 !== a.has(c.target).length || (b.fadeOut(300), $("html, body").css({
+				overflow: "",
+				height: ""
+			}))
+		});
+		$(document).on("keydown", function(a) {
+			27 === a.keyCode && (b.fadeOut(300), $("html, body").css({
+					overflow: "",
+					height: ""
+				}),
+				$(".image_fullscreen").fadeOut("fast", function() {
+					$(this).hide().remove()
+				}))
+		})
+}
+
 var top_element = $(".infoline_header");
 if ("" != top_element) var offset_top = top_element.offset().top,
     top_element_height = top_element.outerHeight(!0),
@@ -42,6 +140,11 @@ jQuery.fn.animateAuto = function(b, a, c) {
     })
 };
 
+function scrollToAnchor(aid){
+    var aTag = $("a[name='"+ aid +"']");
+    $('html,body').animate({scrollTop: aTag.offset().top},'slow');
+}
+
 function readURL(b, a) {
     if (b.files && b.files[0]) {
         var c = new FileReader;
@@ -51,24 +154,24 @@ function readURL(b, a) {
         c.readAsDataURL(b.files[0])
     }
 }
-$(document).ready(function() {
 
-	$("img").error(function () {
-	  console.log($(this).attr("src"));
-	  /*$(this).unbind("error").attr("src", "images/icons/99.png");
-	  $(this).addClass("img_error_not_found");*/
-	});
+function chatMsgField()
+{
+	// $(".chat_msgField").niceScroll();
+}
 
-    $(".infoline_header").height();
-    $(".chat_msgField").niceScroll();
-    var b = 0,
-        a = null;
-    $(function() {
-        $(".infoline_userOptions li:first-child a").on("click", function(c) {
+function loginFrame() {
+	
+    var b = 0;
+    var a = 0;
+console.log('Framecall');
+          $(document).on("click", ".infoline_userOptions li:first-child a", function(c) {
+			console.log('FrameEvent');
             c.stopPropagation();
             c.preventDefault();
             b++;
             1 === b ? a = setTimeout(function() {
+				console.log($(".user_panel"));
                 $(".user_panel").stop(!0).fadeToggle(300, function() {
                     $(this).trigger("mouseup")
                 });
@@ -77,43 +180,18 @@ $(document).ready(function() {
         }).on("dblclick", function(a) {
             a.preventDefault()
         })
-    });
-    "loginFrame" == document.URL.split("#")[1] &&
-        $(".user_panel").show()
-});
-$(document).ready(function() {
-    var b = $("#LogoutOverlay"),
-        a = $("#logoutPanel");
-    $(".logout_servicepanel a:first-child").click(function(c) {
-        b.fadeIn(500);
-        a.fadeIn(500);
-        $("html, body").css({
-            overflow: "show",
-            height: "100%"
-        })
-    });
-    $(".close").click(function(a) {
-        b.fadeOut(300)
-    });
-    $(document).mouseup(function(c) {
-        a.is(c.target) || 0 !== a.has(c.target).length || (b.fadeOut(300), $("html, body").css({
-            overflow: "",
-            height: ""
-        }))
-    });
-    $(document).on("keydown", function(a) {
-        27 === a.keyCode && (b.fadeOut(300), $("html, body").css({
-                overflow: "",
-                height: ""
-            }),
-            $(".image_fullscreen").fadeOut("fast", function() {
-                $(this).hide().remove()
-            }))
-    })
-});
-$(function() {
 
-	
+    "loginFrame" == document.URL.split("#")[1] &&
+        $(".user_panel").show();
+		
+	$(document).on('click', '.add_post_btn', function(a){
+		$('.post-addContainer-fast').slideDown(500);
+		scrollToAnchor('replyAdd');
+	});
+}
+
+function loginFrameDrag()
+{	
 	var top_pos = 1 * readCookie("akb_loginpanel_y");
 	var left_pos = 1 * readCookie("akb_loginpanel_x");
 	
@@ -137,7 +215,7 @@ $(function() {
     }, {
         containment: "window"
     })
-});
+}
 $(function() {
     $(".uploadForm").draggable({
         scroll: !1,
@@ -149,7 +227,32 @@ $(function() {
         containment: ".main"
     })
 });
-$(document).ready(function() {
+
+function randomNumber(min, max)
+{
+	return Math.floor(Math.random()*(max-min+1)+min);
+}
+
+function imageZoom()
+{
+	$('.img-zoom').on({
+	  mouseenter: function () {
+		  console.log("mouseenter");
+		$(this).css(
+		  'transform', 'scale(1.2) rotateZ('+ randomNumber(-3, 4) +'deg)'
+		);
+	  },
+	  mouseout: function () {
+		  console.log("mouseout");
+		$(this).css(
+		  'transform', 'scale(1) rotateZ(0deg)'
+		);
+	  }
+	});
+}
+
+function registerVariousEvents()
+{	
     var b;
     $(".userFrame").hover(function() {
         $(".userFrame_attached").stop().fadeOut(300, function() {
@@ -175,7 +278,8 @@ $(document).ready(function() {
                 $(".userFrame_attached").fadeIn("slow").offset({
                     top: a.top,
                     left: elementPos
-                })
+                });
+				imageZoom();
             }).fail(function(a) {}))
         }, 600))
     }, function() {
@@ -270,4 +374,4 @@ $(document).ready(function() {
             $("#serverTime").html(a)
         },
         1E3)
-});
+}

@@ -1,0 +1,175 @@
+/* 
+Theme Title: akasiboard_moderndark_theme
+Description: The Main Theme for the Admin area of the Board.
+Version: 1.0
+Color Version: Purple
+Site URL: http://dignum-aliorum.tk/
+Author: Ian Tanthal
+Copyright 2014
+*/
+
+/* Classes '.' ID's '#' */
+/* top right bottom left */
+
+.graphics {
+	display: inline-block;
+	vertical-align: middle;
+	background-repeat: no-repeat;
+	background-size: 260px 60px;
+	width: 260px;
+	height: 60px;
+}
+
+.adminPanel {
+	width: 100%;
+	height:auto;
+	position:relative;
+	display:inline-block;
+}
+
+/* Sidebar Style BEGIN */
+
+.adminSidebar {
+	background-color: rgba(22, 21, 23, 0.75);
+	box-shadow: inset 0px 1px 3px #000;
+	border-radius:0 10px 10px 0;
+	float:left;
+	min-height:500px;
+	width: 300px;
+	position:relative;
+}
+
+.adminSidebar_header {
+	padding:20px;
+	height:60px;
+}
+
+#adminSidebar_header_icon {
+	background-image:url('../images/graphics/admin.png');
+}
+
+.adminSidebar_list li {
+	background-size:30px auto;
+	background-repeat:no-repeat;
+	background-position:center left;
+	border-bottom: 1px solid #000;
+	box-sizing:border-box;
+	box-shadow: 2px 2px 5px #000;
+	text-align:right;
+	list-style:none;
+	width:90%;
+	height:50px;
+	line-height: 50px;
+	padding-right:25px;
+}
+
+.adminSidebar_list li:hover {
+	background-color: #363636;
+}
+
+.adminSidebar_list li.active {
+	background-color: #363636;
+}
+
+/* Sidebar Style END */
+
+/* Page Navigation BEGIN */
+
+.adminNav {
+	float: left;
+	margin-top: 5px;
+}
+
+.adminNav li {
+	background-size:30px auto;
+	background-repeat:no-repeat;
+	background-position:top center;
+	border: 1px outset #363636;
+	border-radius:10px;
+	box-shadow: 2px 2px 5px #161616;
+	display:inline-block;
+	list-style:none;
+	width:100px;
+	height:100px;
+	margin-right:50px;
+	margin-bottom: 50px;
+	float:left;
+}
+
+.adminNav li:hover {
+	border: 1px outset #4B4646;
+}
+
+.adminNav a {
+	text-align:center;
+	vertical-align:middle;
+	display: table-cell;
+	height:100%;
+	width:100%;
+	
+	/* Internet Explorer 10 */
+	display:-ms-flexbox;
+	-ms-flex-pack:center;
+	-ms-flex-align:center;
+
+	/* Firefox */
+	display:-moz-box;
+	-moz-box-pack:center;
+	-moz-box-align:center;
+
+	/* Safari, Opera, and Chrome */
+	display:-webkit-box;
+	-webkit-box-pack:center;
+	-webkit-box-align:center;
+
+	/* W3C */
+	display:box;
+	box-pack:center;
+	box-align:center;
+}
+
+/* Page Navigation END */
+
+/* Admin Control Panel BEGIN */
+
+.adminContent {
+	float:left;
+	background-color: rgba(22, 21, 23, 0.75);
+	box-shadow: inset 0px 1px 3px #000;
+	border-radius:10px;
+	min-height:700px;
+	width: 88%;
+	padding:15px;
+	margin: -15px 35px 0 35px;
+}
+
+.adminContentHeader {
+	margin-bottom:50px;
+}
+
+.adminContentHeader h2 {
+	text-align:center;
+}
+
+.adminContent table {
+	width:100%;
+}
+
+.adminContainer {
+	margin-left: 320px;
+}
+
+.adminContentTable th {
+	padding: 20px 10px 20px 0;
+	width:200px;
+	text-align:left;
+}
+
+.adminContentTable select {
+	width:200px;
+	padding:2px;
+	background-color: #1A1A1A;
+	color:#FFF;
+}
+
+/* Admin Control Panel END */

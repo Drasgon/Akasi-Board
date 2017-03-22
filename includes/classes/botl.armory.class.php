@@ -23,14 +23,16 @@ class Armory
 		private $_connection;
 		private $_error;
 		private $_formattedURL;
+		private $armoryDebugging = FALSE;
 		
 		private $oauth_key = 'nr2gegr76qe55aw3f96dgq6pzf7b88tu';
 		private $url_space_string = '%20';
 		
 		private $guild_realm = 'Arthas';
 		private $guild = 'Bane of the Legion';
-		private $locale = 'en_US';
+		private $locale = 'de_DE';
 		private $fields = '';
+		private $lastCacheString = "NONE";
 		
 		private $realm_toreplace = '_guildRealm';
 		private $locale_toreplace = '_locale';
@@ -64,15 +66,23 @@ class Armory
 			'rank'
 		);
 		
-		public $guild_ranks = ARRAY(
-			'Gildenmeister',
-			'Gildenrat',
-			'Veteran',
-			'Mitglied',
-			'Twink',
-			'Neuling Twink',
-			'Neuling',
+		public $class_data = ARRAY(
+			0 => ARRAY('',					'#000000'),
+			1 => ARRAY('Krieger', 			'#C79C6E'),
+			2 => ARRAY('Paladin', 			'#F58CBA'),
+			3 => ARRAY('Jäger', 			'#ABD473'),
+			4 => ARRAY('Schurke', 			'#FFF569'),
+			5 => ARRAY('Priester', 			'#FFFFFF'),
+			6 => ARRAY('Todesritter', 		'#C41F3B'),
+			7 => ARRAY('Schamane', 			'#0070DE'),
+			8 => ARRAY('Magier', 			'#69CCF0'),
+			9 => ARRAY('Hexenmeister', 		'#9482C9'),
+			10 => ARRAY('Mönch', 			'#558A84'),
+			11 => ARRAY('Druide', 			'#FF7D0A'),
+			12 => ARRAY('Dämonenjäger',		'#A330C9'),
 		);
+		
+		public $guild_ranks = '';
 		
 		
 		public function __construct($db, $connection, $error)
@@ -88,25 +98,54 @@ class Armory
 			$this->url = str_replace($this->locale_toreplace, $this->locale, $this->url);
 			$this->url = str_replace($this->guild_toreplace, $this->guild, $this->url);
 			$this->url = str_replace($this->authkey_toreplace, $this->oauth_key, $this->url);
+			
+			$this->guild_ranks = parse_ini_file('config/ranks.ini', TRUE);
+			$this->guild_ranks = $this->guild_ranks["ranks"];
 		}
 		
 		
 		
 		public function generateURL($fields = 'members')
 		{
-				$this->_formattedURL = str_replace($this->fields_toreplace, $fields, $this->url);
-				
-			return $this->_formattedURL;
+			return $this->_formattedURL = str_replace($this->fields_toreplace, $fields, $this->url);
 		}
 		
 		
 		public function get_guild_data($fields)
 		{
+
 			if($this->check_cache_time($this->data_type[$fields]) === TRUE)
-				$this->responseJSON = json_decode(file_get_contents($this->generateURL($fields)));
+			{
 				
-				// Automatically cache the results in the database
-				$this->store_in_database($this->responseJSON, $fields);
+				$this->lastCacheString = $this->generateURL($fields);
+					if($this->armoryDebugging == TRUE)
+					{
+						ini_set('display_startup_errors',1);
+						ini_set('display_errors',1);
+						error_reporting(-1);
+					}
+					
+				$arrContextOptions=array(
+					"ssl"=>array(
+						"verify_peer"=>false,
+						"verify_peer_name"=>false,
+					),
+				);  
+				$this->responseJSON = file_get_contents($this->lastCacheString, false, stream_context_create($arrContextOptions));
+				if($this->armoryDebugging == TRUE)
+					var_dump($this->responseJSON);
+				
+					if($this->responseJSON === false)
+						$this->responseJSON = false;
+					else
+						$this->responseJSON = json_decode($this->responseJSON);
+			}
+				
+				if($this->responseJSON)
+				{
+					// Automatically cache the results in the database
+					$this->store_in_database($this->responseJSON, $fields);
+				}
 				
 			return $this->responseJSON;
 		}
@@ -136,7 +175,7 @@ class Armory
 			if(array_key_exists($type, $this->data_type))
 			{
 				if($this->check_cache_time($type) === true)
-					$this->_db->query("INSERT INTO ".$this->_db->table_armory_time." (type, timestamp) VALUES (".$this->data_type[$type].", ".time().") ON DUPLICATE KEY UPDATE timestamp='".time()."'");
+					$this->_db->query("INSERT INTO ".$this->_db->table_armory_time." (type, timestamp, query_string) VALUES (".$this->data_type[$type].", ".time().", '".$this->lastCacheString."') ON DUPLICATE KEY UPDATE timestamp='".time()."', query_string='".$this->lastCacheString."'");
 			}
 		}
 		
@@ -156,15 +195,20 @@ class Armory
 		{
 			if(array_key_exists($type, $this->data_type) && $this->check_cache_time($type))
 			{
-				$clear = $this->clear_database_store($type);
+				$json = $this->get_guild_data($fields);
 				
-				if($clear)
+				if($json)
 				{
-					$json = $this->get_guild_data($fields);
+					$clear = $this->clear_database_store($type);
 					$this->set_cache_time($type);
 					
-					if($json)
-						return $json;
+					return $json;
+				}
+				else
+				{
+					$this->set_cache_time($type);
+					
+					return false;
 				}
 				
 			}
@@ -232,6 +276,12 @@ class Armory
 		public function get_rank($rank_id)
 		{
 			return $this->guild_ranks[$rank_id];
+		}
+		
+		
+		public function getClassData($classID)
+		{
+			return $this->class_data[$classID];
 		}
 	}
 ?>

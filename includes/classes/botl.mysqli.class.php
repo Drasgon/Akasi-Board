@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-	ini_set('display_startup_errors',1);
-	ini_set('display_errors',1);
-	error_reporting(-1);
+	ini_set('display_startup_errors',0);
+	ini_set('display_errors',0);
+	error_reporting(0);
 
 class Database
 
@@ -26,13 +26,13 @@ class Database
 
   // DB CONFIG
 
-  private $db_user 		= 'root';
-  private $db_pwd  		= '';
-  private $db_host 		= '127.0.0.1';
+  private $db_user 		= 'ni204675_1sql1';
+  private $db_pwd  		= 'ddfs789df/()/()dkdkdsasa';
+  private $db_host 		= 'vweb17.nitrado.net';
   private $db_port 		= '3306';
-  private $db_name 		= 'botl';
-  private $db_charset 	= 'utf8';
-  private $use_port		= false;
+  private $db_name 		= 'ni204675_1sql1';
+  private $db_charset 		= 'utf8';
+  private $use_port		= true;
 
   // CLASS CONFIG
 
@@ -67,8 +67,8 @@ class Database
   public $table_armory_time   		= 'armory_time';
   public $table_guild_members   	= 'guild_characters';
   public $table_guild_news   		= 'guild_news';
-  public $table_guild_achievements  = 'guild_achievements';
-
+  public $table_guild_achievements  	= 'guild_achievements';
+  public $table_guild_calendar  	= 'guild_calendar_data';
 
   
   // Build mysqli connection
@@ -84,7 +84,7 @@ class Database
 		if(get_class($globalLink) == 'Database')
 		{
 			$port = ($this->use_port == true) ? ':' .$this->db_port : '';
-			$globalLink = new mysqli($this->db_host . $port, $this->db_user, $this->db_pwd, $this->db_name);
+			$globalLink = new mysqli($this->db_host, $this->db_user, $this->db_pwd, $this->db_name, $this->db_port);
 			if (!$globalLink) $this->mysqli_db_error('Database connect failed', 'One of the given values is incorrect', $this->mysql_errors["login"]);
 			else
 			{
@@ -140,6 +140,26 @@ class Database
 		return mysqli_num_rows($data);
 	}
 
+	
+  public function build_columns_from_array($arr)
+	{
+		$str = '';
+		$count = count($arr);
+		$i = 0;
+		
+		foreach ($arr as $value)
+		{
+			$str .= $value;
+			
+			if(++$i != $count) {
+				$str .= ', ';
+			}
+		}
+		
+		return $str;
+	}
+	
+	
   // Error handler
 	
   public function mysqli_db_error($errormsg, $error_reason = "", $error_number = "", $query_string = "")

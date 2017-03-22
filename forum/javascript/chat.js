@@ -29,7 +29,7 @@ var msgSend_processing = !1,
 	
 	
 	
-$(document).ready(function() {
+/*$(document).ready(function() {
 	var b = $.cookie("chat_notify_volume");
 	$.ionSound({
 		sounds: ["notify"],
@@ -51,7 +51,22 @@ $(document).ready(function() {
 		});
 		$.ionSound.play("notify")
 	})
-});
+});*/
+
+function clearAllChatTimers()
+{
+	if(!$(".portal_chat_inner").length)
+	{
+		clearTimeout(pullInterval);
+		console.log("Chat unavailable!");
+	}
+	else
+	{
+		messagePullHandler();
+	}
+
+}
+
 $(".chat_msgField").bind("mousewheel DOMMouseScroll", function(b) {
 	var a = b.originalEvent;
 	this.scrollTop += 30 * (0 > (a.wheelDelta || -a.detail) ? 1 : -1);
@@ -104,12 +119,7 @@ if (!chatLock) {
 					var a = $.trim(b);
 					"" != b && "" != a && ($(".chat_msgField").append(b).children(":last").hide().fadeIn(3E3), 500 >= $(".chat_msgField")[0].scrollHeight - $(".chat_msgField").scrollTop() && $(".chat_msgField").animate({
 						scrollTop: $(".chat_msgField")[0].scrollHeight
-					}, 1E3), b = $.cookie("chat_notify_volume"), "undefined" === typeof $.cookie("chat_notify_volume") && (b = 25), $.ionSound({
-						sounds: ["notify"],
-						path: "./sounds/",
-						multiPlay: !0,
-						volume: b
-					}), $.ionSound.play("notify"));
+					}, 1E3));
 					1 == private_chat && (timer_const = window.setTimeout(function() {
 						privatePullHandler()
 					}, 5E3))
@@ -141,22 +151,12 @@ if (!chatLock) {
 					}, 1E3)) : (1 >= control && ($(".chat_msgField").append(a).children(".chatRow"), $(".chat_msgField").scrollTop($(".chat_msgField")[0].scrollHeight)
 					), 1 < control && (500 >= $(".chat_msgField")[0].scrollHeight - $(".chat_msgField").scrollTop() && $(".chat_msgField").animate({
 						scrollTop: $(".chat_msgField")[0].scrollHeight
-					}, 1E3), $(".chat_msgField").append(a).children(":last").hide().fadeIn(1E3), a = $.cookie("chat_notify_volume"), "undefined" === typeof $.cookie("chat_notify_volume") && (a = 25), $.ionSound({
-						sounds: ["notify"],
-						path: "./sounds/",
-						multiPlay: !0,
-						volume: a
-					}), $.ionSound.play("notify"))))
+					}, 1E3), $(".chat_msgField").append(a).children(":last").hide().fadeIn(1E3), a = $.cookie("chat_notify_volume"), "undefined" === typeof $.cookie("chat_notify_volume") && (a = 25))));
+					
+					imageZoom();
 				}
 			})
 		};
-	(function(b) {
-		b.extend({
-			playSound: function(a) {
-				return b("<embed src='" + a + ".mp3' hidden='true' autostart='true' loop='false' class='playSound'><audio autoplay='autoplay' style='display:none;' controls='controls'><source src='" + a + ".mp3' /><source src='" + a + ".ogg' /></audio>").appendTo("body")
-			}
-		})
-	})(jQuery);
 	$("#portal_chat").submit(function(b) {
 		b.stopPropagation();
 		b.preventDefault();
@@ -187,7 +187,9 @@ if (!chatLock) {
 						backgroundColor: "#CDCDCD"
 					}, 200), setObjectLock(input, !0), clearInterval(pullInterval), $(".chat_msgField").append('<h3 class="chat_systemWarning">--  Sie m\u00fcssen sich erneut einloggen, um den Chat zu nutzen! --</h3>').animate({}, 1E3), $(".chat_msgField")[0].scrollHeight) : (msgSend_processing = !1, animateColor(baseInputColor, submitInputColor, input), $(".chat_msgField").append(a).children(":last").hide().fadeIn(3E3), $(".chat_msgField").animate({
 						scrollTop: $(".chat_msgField")[0].scrollHeight
-					}, 1E3), $("#chatMsg_add").val("").attr("disabled", !1).focus())
+					}, 1E3), $("#chatMsg_add").val("").attr("disabled", !1).focus());
+					
+					imageZoom();
 				}
 			});
 			return !1
@@ -222,9 +224,7 @@ if (!chatLock) {
 		})
 		
 	});
-	$(document).ready(function() {
-		messagePullHandler();
-	});
+
 	var emoticon_timer;
 	$("#parseEmoticons").change(function(b) {
 		clearTimeout(emoticon_timer);
@@ -289,7 +289,9 @@ if (!chatLock) {
 				timer_initial = window.setTimeout(function() {
 					privatePullHandler();
 					clearTimeout(timer_initial)
-				}, 5E3)
+				}, 5E3);
+				
+				imageZoom();
 			}
 		})
 	});

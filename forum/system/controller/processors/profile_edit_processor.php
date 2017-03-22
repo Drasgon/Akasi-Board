@@ -4,7 +4,7 @@ Profile edit handler START
 */
 function edit_profile() {
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 
 	if (!isset($db) || $db == NULL)
 	{
@@ -23,6 +23,9 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 	$sn_twitter = mysqli_real_escape_string($GLOBALS['connection'], $_POST['sn_twitter']);
 	$sn_googleplus = mysqli_real_escape_string($GLOBALS['connection'], $_POST['sn_googleplus']);
 	$sn_tumblr = mysqli_real_escape_string($GLOBALS['connection'], $_POST['sn_tumblr']);
+	$character_name = mysqli_real_escape_string($GLOBALS['connection'], $_POST['character_name']);
+	$character_realm = mysqli_real_escape_string($GLOBALS['connection'], $_POST['character_realm']);
+	
 	
 	$updateProfile = $db->query("SELECT id FROM $db->table_profile WHERE id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
 
@@ -56,6 +59,9 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 	, sn_tumblr=('".$sn_tumblr."') 
 		WHERE id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
 	}
+	
+	$main->updateAccount('character_realm', $character_realm);
+	$main->updateAccount('character_name', $character_name);
 	
 	if(!$updateProfile) {
 		return false;

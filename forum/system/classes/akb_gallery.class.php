@@ -80,10 +80,10 @@ class Gallery
 		
 		$this->dirBase = './images/gallery/';
 		
-			if(isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true)
+			if(isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true)
 			{
-				$this->userBase = $this->dirBase.$_SESSION['username'];
-				$this->userid = $_SESSION['userid'];
+				$this->userBase = $this->dirBase.$_SESSION['USERNAME'];
+				$this->userid = $_SESSION['USERID'];
 			}
 		
 			$this->publicDirShort = "public";
@@ -194,10 +194,10 @@ class Gallery
 	{
 		$lastUploaded = $this->_database->query("SELECT img_name FROM ".$this->_database->table_gallery_directory." WHERE uploader_id=('".$userId."') ORDER BY id DESC LIMIT 1");
 		
-		$data = mysqli_fetch_object($lastUploaded);
-		$lastUploadedName = $data->img_name;
-		
-		return $lastUploadedName;
+		if($data = mysqli_fetch_object($lastUploaded))
+			return $data->img_name;
+		else
+			return false;
 	}
 	
 	

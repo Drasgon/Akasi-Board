@@ -31,12 +31,27 @@ Signatur bearbeiten
 <form method="POST" action="'.$main->getURI().'&action=updateSignature" enctype="multipart/form-data">
 
 <textarea type="hidden" id="signatureEditArea" name="signatureEditArea">'.$initialContent.'</textarea>
-  <script type="text/javascript">
-CKEDITOR.replace("signatureEditArea", { 
-language: "de", 
-enterMode : CKEDITOR.ENTER_BR
-});
-</script>
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+	    <script>tinymce.init({ 
+					skin_url: "css/tinymce",
+					skin: "charcoal",
+					language_url : "lang/tinymce/de.js",
+					language: "de",
+					selector:"#signatureEditArea",
+					plugins: [
+					"autoresize advlist autolink lists link image charmap print preview hr anchor pagebreak",
+					"searchreplace wordcount visualblocks visualchars code fullscreen",
+					"insertdatetime media nonbreaking save table contextmenu directionality",
+					"emoticons template paste textcolor colorpicker textpattern imagetools codesample"
+				  ],
+					toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+					  toolbar2: "print preview media | forecolor backcolor fontsizeselect emoticons | codesample",
+					  image_advtab: true,
+					autoresize_min_height: 350,
+					autoresize_max_height: 550
+					
+				});
+		</script>
 <input type="submit" name="submit" value="Senden" class="accSettingsSubmit">
 
         </form>

@@ -27,8 +27,7 @@ else
 	error_reporting(-1);
 	
 	$totalGenerateTime = microtime(TRUE);
-	
-	
+
 	
 // Use maintenance mode
 include('system/security/maintenance_mode.php');
@@ -82,30 +81,31 @@ if(isset($_GET['page']) && $_GET['page'] == 'contact')
 	echo '<meta name="robots" content="noindex, nofollow" />';
 
 echo '
-  <link rel="SHORTCUT ICON" href="favicon.ico" type="image/x-icon">
-  <!--[if lt IE 9]><script src="https://code.jquery.com/jquery-1.11.1.min.js"></script><![endif]-->
-  <script src="./javascript/jquery-2.1.1.min.js"></script>
-  <script src="./javascript/jquery-ui.js"></script>
-  <script defer src="./javascript/jquery.nicescroll.min.js"></script>
-  <script defer src="./javascript/ajax.js"></script>
-  <script defer src="./javascript/parallax.js"></script>
-  <script defer src="./javascript/jquery.cookie.js"></script>
-  <script defer src="./javascript/ion.sound.js"></script>
-  <script defer src="./javascript/frameControl.js"></script>
-  <script src="./system/ckeditor/ckeditor.js"></script>
-  <script src="./javascript/DragPosition.js"></script>
-  
+	  <link rel="SHORTCUT ICON" href="favicon.ico" type="image/x-icon">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	  <script src="./javascript/jquery-ui-1.9.2.custom.min.js"></script>
+	  <script src="./javascript/jquery.smoothState.js"></script>
+	  <script defer src="./javascript/pagesmooth.js"></script>
+	  <script defer src="./javascript/ajax.js"></script>
+	  <script defer src="./javascript/parallax.js"></script>
+	  <script defer src="./javascript/jquery.cookie.js"></script>
+	  <script defer src="./javascript/ion.sound.js"></script>
+	  <script defer src="./javascript/frameControl.js"></script>
+	  <script defer src="./javascript/jquery.nicescroll.min.js"></script>
+	  <script defer src="./system/ckeditor/ckeditor.js"></script>
+	  <script defer src="./javascript/DragPosition.js"></script>
+	  <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
   </head>';
 
 
 echo '<body id="body">
-					<div class="background" id="background">
+					<!--<div class="background" id="background">
 						<video autoplay="" loop="" poster="img/bg/sv-ol.jpg">
 						  <source src="../img/bg/video/sv-ol.mp4" type="video/mp4">
 						  <source src="../img/bg/video/sv-ol.webm" type="video/webm">
 								Your browser does not support the video tag.
 						</video>
-					</div>';
+					</div>-->';
 
 // Use system for checking URL vality. [Disabled due to get key issues. Activated again, when fixed]
 #$main->useFile('./system/controller/security/getParam_validate.php');
@@ -128,7 +128,7 @@ $actualURL = $main->getURI();
 #		If client is a valid and logged in user, 
 #		show logout button(and frame as well) and set state of the Ajax messaging system.
 */ ######
-if ((isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] = true) && isset($_SESSION['ID']))
+if ((isset($_SESSION['STATUS']) || $_SESSION['STATUS'] = true) && isset($_SESSION['ID']))
 {
     require('./system/interface/logoutFrame.php');
     
@@ -149,7 +149,7 @@ if ((isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] = true) && isset(
     */ ######		
     
     // Check if user has set the cursor on.
-	if(isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == TRUE && !isset($_SESSION['cursor']))
+	if(isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == TRUE && !isset($_SESSION['cursor']))
 	{
 		$getactualCursor = $db->query("SELECT user_cursor FROM $db->table_accdata WHERE account_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))") or die(mysqli_error($GLOBALS['connection']));
 		
@@ -159,7 +159,7 @@ if ((isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] = true) && isset(
 	}
     
     // 	If state is set to 1, enable cursor -- Values: 1 = Enabled, 2 = Disabled.
-    if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == TRUE && isset($_SESSION['cursor']) && $_SESSION['cursor'] == '1')
+    if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == TRUE && isset($_SESSION['cursor']) && $_SESSION['cursor'] == '1')
         // Inline HTML output to activate the cursor
         echo '<style>* { cursor: url(images/cursor/cursor_scaled.png), move;}</style>';
 

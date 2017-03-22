@@ -26,7 +26,7 @@ Copyright (C) 2015  Alexander Bretzke
           Sind Sie sicher, dass Sie sich abmelden möchten?
         </h3>
         <form class=LogoutForm action="?action=logout" method=POST>
-          <input type=submit value=Abmelden name=logout class=LogoutSubmitTrue>
+          <input type=submit value="Ja, Abmelden, verdammt nochmal !" name=logout class=LogoutSubmitTrue>
         </form>
       </div>
     </div>

@@ -40,7 +40,7 @@ else
 	echo '
 		<footer>
 			<div class="footer_inner">
-					<span class="fancy_font">System Version: 0.0.3a Development Release - Database Version: 0.1a | Copyright 2015, Alexander Bretzke - All rights reserved</span><br>
+					<span class="fancy_font">System Version: 0.6.0b Development Release - Database Version: 0.8.5b | Copyright 2016, Bane of the Legion - All rights reserved</span><br>
 					<span class="fancy_font">Query execution time: '.(round($totalQueryTime * 1000, 3)).' ms - Queries fired: '.$totalQueries.'</span><br>
 					<span class="fancy_font">Page generated in: '.(round((microtime(TRUE) - $totalGenerateTime) * 1000, 3)).' ms</span>
 			</div>

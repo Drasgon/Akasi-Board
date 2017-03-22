@@ -7,7 +7,7 @@
 	if (!isset($main) || $main == NULL)
 		$main = new Board($db, $connection);
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 	$getData = $db->query("SELECT id, location, hobbies, about, msngr_skype, msngr_icq, sn_facebook, sn_twitter, sn_googleplus, sn_tumblr FROM $db->table_profile WHERE id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
 	$data = mysqli_fetch_object($getData);
 	
@@ -21,6 +21,11 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 		(!isset($data->sn_twitter) || empty($data->sn_twitter)) ? $sn_twitter = '' : $sn_twitter = $data->sn_twitter;
 		(!isset($data->sn_googleplus) || empty($data->sn_googleplus)) ? $sn_googleplus = '' : $sn_googleplus = $data->sn_googleplus;
 		(!isset($data->sn_tumblr) || empty($data->sn_tumblr)) ? $sn_tumblr = '' : $sn_tumblr = $data->sn_tumblr;
+		
+		$accountData = $main->getUserdata($data->id);
+		
+		$character_name = $accountData['character_name'];
+		$character_realm = $accountData['character_realm'];
 	
 
 	if(isset($_GET['form']) && $_GET['form']  == 'submit') {
@@ -41,6 +46,27 @@ $profileEdit .='
   </div></div>
 
 <form class="profileEdit_main" method="POST" action="?page=Profile&Tab=Edit&form=submit">
+	<div class="Container_reg">
+      <div class="formField_label">
+        <label for="character_name">
+        Charaktername
+        </label>
+      </div>
+      <div class="reg_containerInput">
+        <input type="text" name="character_name" value="'.$character_name.'" id="character_name" class="registerInputField" autocomplete="off" placeholder="Charaktername">
+      </div>	  
+    </div>
+	
+	<div class="Container_reg">
+      <div class="formField_label">
+        <label for="character_realm">
+        Charakter Realm
+        </label>
+      </div>
+      <div class="reg_containerInput">
+        <input type="text" name="character_realm" value="'.$character_realm.'" id="character_realm" class="registerInputField" autocomplete="off" placeholder="Charakter Realm">
+      </div>	  
+    </div>
   <div class="Container_reg">
     <div class="formField_label">
       <label for="location">
@@ -177,9 +203,24 @@ $errorMsg = 'Sie verfügen nicht übr die erforderlichen Zugriffsrechte um diese
 throwError($errorMsg);
 }
 ?>
-	    <script type="text/javascript">
-			CKEDITOR.replace('about', { 
-			language: 'de', 
-			enterMode : CKEDITOR.ENTER_BR
-			});
+		<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+	    <script>tinymce.init({ 
+					skin_url: "css/tinymce",
+					skin: "charcoal",
+					language_url : "lang/tinymce/de.js",
+					language: "de",
+					selector:"#about",
+					plugins: [
+					"autoresize advlist autolink lists link image charmap print preview hr anchor pagebreak",
+					"searchreplace wordcount visualblocks visualchars code fullscreen",
+					"insertdatetime media nonbreaking save table contextmenu directionality",
+					"emoticons template paste textcolor colorpicker textpattern imagetools codesample"
+				  ],
+					toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+					  toolbar2: "print preview media | forecolor backcolor fontsizeselect emoticons | codesample",
+					  image_advtab: true,
+					autoresize_min_height: 350,
+					autoresize_max_height: 550
+					
+				});
 		</script>

@@ -1,0 +1,15 @@
+# Automatically answer all prompts negatively not to stall
+# the script on errors
+option batch on
+# Disable overwrite confirmations that conflict with the previous
+option confirm off
+
+
+open ftp://gpftp717922408699:iviQYXge@176.57.171.3
+
+# option exclude "TheIsland.ark"
+# synchronize local E:\ARK_J-A_SAVE\ ShooterGame/Saved/
+ls ShooterGame/Saved/SavedArks/
+get "/ShooterGame/Saved/SavedArks/*TheIsland.ark" "E:\ARK_J-A_SAVE\SavedArks\TheIsland_%TIMESTAMP#dd.mm.yyyy_hh.nn.ss%_Automated.ark"
+close
+exit

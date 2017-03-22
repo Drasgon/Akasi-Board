@@ -9,7 +9,7 @@ if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 	
 	
-if (isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] = true) {
+if (isset($_SESSION['STATUS']) || $_SESSION['STATUS'] = true) {
     function Logout()
     {
         
@@ -117,7 +117,7 @@ if (isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] = true) {
         $unsetSession2  = "UPDATE $db->table_accounts SET logged_in=0, last_sid=sid, sid=NULL WHERE sid=('" . $_SESSION['ID'] . "')";
         
         if (!$unsetSession) {
-            $db->query("INSERT INTO $db->table_accountlogs (account_id, message_fail, user_agent, time, sid, user_ip) VALUES ((SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')), 'Status der User Sitzung konnte nicht geändert werden.', ('" . $userAgent . "'), NOW(), ('" . $_SESSION['ID'] . "'), ('" . $client_ip . "'))");
+            $db->query("INSERT INTO $db->table_accountlogs (account_id, message, user_agent, time, sid, user_ip) VALUES ((SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')), 'Status der User Sitzung konnte nicht geändert werden.', ('" . $userAgent . "'), NOW(), ('" . $_SESSION['ID'] . "'), ('" . $client_ip . "'))");
             return;
         } else {
             

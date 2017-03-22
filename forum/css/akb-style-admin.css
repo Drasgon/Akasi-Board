@@ -159,6 +159,26 @@ Copyright 2014
 	margin-left: 320px;
 }
 
+.warning_admin {
+	padding:15px;
+	padding-left:50px;
+	margin-bottom:55px;
+	font-size:1.15em;
+	color: rgb(206, 106, 40);
+	background-color: rgba(220, 39, 39, 0.26);
+	border-radius:150px 0 0 150px;
+	text-shadow:1px 1px 5px #000;
+	border-left: 2px solid rgb(189, 21, 21);
+	box-shadow: inset 7px 7px 15px rgba(0, 0, 0, 0.48);
+	border-bottom: 2px solid rgba(191, 21, 21, 0.8);
+}
+
+#serveroptions input {
+	zoom:1.25;
+	margin-left:15px;
+	border-left: 10px solid rgb(54, 148, 36);
+}
+
 .adminContentTable th {
 	padding: 20px 10px 20px 0;
 	width:200px;
@@ -170,6 +190,12 @@ Copyright 2014
 	padding:2px;
 	background-color: #1A1A1A;
 	color:#FFF;
+}
+
+.threadMoveListTitle {
+    background-color: rgb(57, 165, 51);
+    color: rgb(255, 255, 255);
+    text-align: center;
 }
 
 /* Admin Control Panel END */

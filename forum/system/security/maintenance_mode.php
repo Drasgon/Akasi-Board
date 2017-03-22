@@ -9,7 +9,7 @@ if(filename($_SERVER['SCRIPT_FILENAME']) != 'maintenance_mode.php'){ ?>
     <title>
       Error 503 - Internal Server Error
     </title>
-	<link rel=stylesheet href="../../css/akb-maintenance.css" media="screen">
+	<link rel=stylesheet href="css/akb-maintenance.css" media="screen">
   </head>
   
   
@@ -20,19 +20,19 @@ if(filename($_SERVER['SCRIPT_FILENAME']) != 'maintenance_mode.php'){ ?>
     <h2 class="error">
       Error 503
     </h2>
-    <img src="../../images/graphics/warning_detailed.png">
+    <img src="images/graphics/warning_detailed.png">
     <table>
       <tr>
         <h2 class="text">
-          Es ist ein schwerwiegender Fehler beim Aufruf dieser Seite aufgetreten.
+          Diese Seite unterliegt derzeit Wartungsarbeiten.
         </h2>
         <span class="text">
-          Versuchen Sie es später erneut.
+          Versuchen Sie es spÃ¤ter erneut.
         </span>
         <br>
         <br>
         <span size="2">
-          Kontakt: Alexander_Bretzke@gmx.de
+          Kontakt: <a href="mailto:admin@baneofthelegion.de">admin@baneofthelegion.de</a>
         </span>
       </tr>
     </div>

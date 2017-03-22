@@ -37,13 +37,11 @@ a = 0;
 
 function saveContent() {
 
-    for (instance in CKEDITOR.instances) {
-        CKEDITOR.instances[instance].updateElement();
-    }
-
     var inptThread_title = $("#threadTitleInput").val();
-    var inptThread_content = escape($("#threadAddArea").val());
-	var inptThread_content_trimmed = $.trim(inptThread_content).length;
+    var inptThread_content = tinyMCE.activeEditor.getContent();
+	var inptThread_content_trimmed = $.trim($(inptThread_content).text()).length;
+	
+	//console.log(inptThread_content_trimmed);
 	
 	var boardID	= GetURLParameter('boardview');
 	
@@ -53,7 +51,7 @@ function saveContent() {
 	if(i == 1) {
 	a = 0;
 		$('.responseFailed').remove();
-		$( '<span id="ThreadAddResponse_Success saving_activated" class="responseSuccess">Speicherung aktiviert.</span>' ).insertBefore( ".submitPost" ).hide().fadeIn(2000);
+		$( '<span id="ThreadAddResponse_Success saving_activated" class="responseSuccess replyAdd_save">Speichern aktiv</span>' ).insertBefore( ".submitPost" ).hide().fadeIn(2000);
 	}
     $.ajax({
         type: "POST",
@@ -61,20 +59,27 @@ function saveContent() {
         data: "postTitle=" + inptThread_title + '&postContent=' + inptThread_content + '&boardID=' + boardID + '&val_token=' + tokenID,
         cache: false,
 		
-	success: function(data) {
-		console.log("Returned: \n \n \r"+data+"\n \n \r Local Text: \n \n \r"+inptThread_content);
-	}
+	/*success: function(data) {
+		// console.log("Returned: \n \n \r"+data+"\n \n \r Local Text: \n \n \r"+inptThread_content);
+	}*/
     });
 	} else {
 	a++;
 	i = 0;
 	if(a == 1) {
 	$('.responseSuccess').remove();
-	$( '<span id="ThreadAddResponse_Success saving_deactivated" class="responseFailed" title="Die Speicherung wird aktiviert, sobald die Mindestanforderungen erfüllt sind.">Speicherung deaktiviert.</span>' ).insertBefore( ".submitPost" ).hide().fadeIn(2000);
+	$( '<span id="ThreadAddResponse_Success saving_deactivated" class="responseFailed replyAdd_save" title="Das Speichern wird aktiviert, sobald die Mindestanforderungen erf\u00fcllt sind.">Speichern inaktiv</span>' ).insertBefore( ".submitPost" ).hide().fadeIn(2000);
 		}
 	}
 };
 
-window.setInterval(function(){
+var threadSaveInterval;
+
+function clearThreadSaveInterval()
+{
+	clearInterval(threadSaveInterval);
+}
+
+threadSaveInterval = window.setInterval(function(){
 saveContent();
-}, 15000);
+}, 7E3);

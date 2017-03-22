@@ -31,7 +31,7 @@ $db->query("SET NAMES utf8");
 
 if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted') {
     if ($_COOKIE['PHPSESSID'] == '0') {
-        $_SESSION['angemeldet'] = false;
+        $_SESSION['STATUS'] = false;
         setcookie('PHPSESSID', '', time() - 3600);
         return;
     } else {
@@ -42,17 +42,17 @@ if (isset($_COOKIE['PHPSESSID']) && $_COOKIE['PHPSESSID'] != 'deleted') {
         
         if (mysqli_num_rows($checkUserbyQuery) == 0 || mysqli_num_rows($checkUserbyQuery) > 1) {
             setcookie('PHPSESSID', '', time() - 3600);
-            $_SESSION['angemeldet'] = false;
+            $_SESSION['STATUS'] = false;
         } else {
-            $_SESSION['angemeldet'] = true;
+            $_SESSION['STATUS'] = true;
             require('../security/permission_system.php');
         }
     }
 } else {
-    $_SESSION['angemeldet'] = false;
+    $_SESSION['STATUS'] = false;
 }
 
-if(isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if(isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 
 if (isset($_GET['ajaxSend']) && $_GET['ajaxSend'] == 'savePost' && isset($_POST['postContent']) && isset($_POST['val_token']) && !empty($_POST['val_token']) && isset($_POST['threadID']) && !empty($_POST['threadID'])) {
 

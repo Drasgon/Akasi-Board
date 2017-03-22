@@ -67,11 +67,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	
 	if($armory->check_cache_time('members'))
 	{
+	
 		$json = $armory->renew_database_store('members');
-		
-		if(isset($json))
-		{
 
+		if(isset($json) && $json)
+		{
 			foreach($json->members as $object => $character)
 			{
 				$data_row = $character->character;
@@ -82,7 +82,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				$class = $data_row->class;
 				$gender = $data_row->gender;
 				$achievementPoints = $data_row->achievementPoints;
-				$avatar = addslashes($data_row->thumbnail);
+				$avatar = str_replace("avatar", "profilemain", addslashes($data_row->thumbnail));
 				$rank = $character->rank;
 				$realm = addslashes($data_row->realm);
 				
@@ -371,19 +371,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				
 				/* -------------------------------- GENDER END -------------------------------- */
 				/* -------------------------------- CLASS BEGIN -------------------------------- */
-				
-					if($class == "6") { $classColor = "#C41F3B"; $className = 'Todesritter'; //Death Knight
-					 }elseif($class == "11") { $classColor = "#FF7D0A"; $className = 'Druide'; //Druid
-					 }elseif($class == "3") { $classColor = "#ABD473"; $className = 'Jäger'; //Hunter
-					 }elseif($class == "8") { $classColor = "#69CCF0"; $className = 'Magier'; //Mage
-					 }elseif($class == "10") { $classColor = "#558A84"; $className = 'Mönch'; //Monk
-					 }elseif($class == "2") { $classColor = "#F58CBA"; $className = 'Paladin'; //Paladin
-					 }elseif($class == "5") { $classColor = "#FFFFFF"; $className = 'Priester'; //Priest
-					 }elseif($class == "4") { $classColor = "#FFF569"; $className = 'Schurke'; //Rogue
-					 }elseif($class == "7") { $classColor = "#0070DE"; $className = 'Schamane'; //Shaman
-					 }elseif($class == "9") { $classColor = "#9482C9"; $className = 'Hexenmeister'; //Warlock
-					 }elseif($class == "1") { $classColor = "#C79C6E"; $className = 'Krieger'; //Warrior
-					 }else { $classColor = "#000000"; }
+
+					 $classData = $armory->getClassData($class);
+					 $className = $classData[0];
+					 $classColor = $classData[1];
 					 
 					 $bgcolor = hex2rgba($classColor, '0.1');
 				 
@@ -397,21 +388,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				$html .= '
 							<li class="members_row smoothTransitionFast clearfix" style="background-color:'.$bgcolor.'">
 								<div class="columnAvatar clearfix">
-									<img src="http://eu.battle.net/static-render/eu/'.$avatar.'?alt=wow/static/images/2d/avatar/'.$race.'-'.$gender.'.jpg">
+									<img style="background-image: url(\'http://render-eu.worldofwarcraft.com/character/'.$avatar.'?alt=wow/static/images/2d/avatar/'.$race.'-'.$gender.'.jpg\')">
 								</div>
-								<div class="columnName">
-									<a href="http://eu.battle.net/wow/de/character/'.$realm.'/'.$name.'/advanced" style="color:'.$classColor.'" target="_blank">
-										'.$name.' - '.$realm.'
-									</a>
-								</div>
-								<div class="columnLevel">
-									Level '.$level.' - <img src="./img/gfx/icons/'.$genderIcon.'" title="'.$name.' ist '.$genderName.'"> - <img src="http://media.blizzard.com/wow/icons/18/race_'.$race.'_'.$gender.'.jpg"> - <img src="http://media.blizzard.com/wow/icons/18/class_'.$class.'.jpg" title="'.$name.' ist '.$prefix.' '.$className.$prefix_end.'">
-								</div>
-								<div class="columnAchievementPoints">
-									<img src="http://eu.battle.net/wow/static/images/icons/achievements.gif"> '.$achievementPoints.'
-								</div>
-								<div class="columnRank">
-									'.$rankName.'
+								<div class="charSheet">
+									<div class="columnName">
+										<a href="http://eu.battle.net/wow/de/character/'.$realm.'/'.$name.'/advanced" style="color:'.$classColor.'" target="_blank">
+											'.$name.' - '.$realm.'
+										</a>
+									</div>
+									<div class="columnLevel">
+										Level '.$level.'  <img src="./img/gfx/icons/'.$genderIcon.'" title="'.$genderName.'"> <img src="http://media.blizzard.com/wow/icons/18/race_'.$race.'_'.$gender.'.jpg"> <img src="http://media.blizzard.com/wow/icons/18/class_'.$class.'.jpg" title="'.$className.'">
+									</div>
+									<div class="columnAchievementPoints">
+										<img src="http://eu.battle.net/wow/static/images/icons/achievements.gif"> '.$achievementPoints.'
+									</div>
+									<div class="columnRank">
+										'.$rankName.'
+									</div>
 								</div>
 							</li>';
 			}

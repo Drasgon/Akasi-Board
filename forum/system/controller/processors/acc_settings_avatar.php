@@ -74,8 +74,8 @@ if ((($image_ext == "gif")
 	$imageX = $image->getWidth();
 	$imageY = $image->getHeight();
 
-	if($imageY > '150' || $imageX > '150' && $_FILES['image']['type'] != 'image/gif') {
-		$image->resizeToWidth(150, $extension);
+	if($imageY > '225' || $imageX > '225' && $_FILES['image']['type'] != 'image/gif') {
+		$image->resizeToWidth(225, $extension);
 	}
 
 	$newFilename       = md5($filename).'.'.$extension;

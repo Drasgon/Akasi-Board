@@ -18,7 +18,6 @@ RewriteRule ^(.*)$  /$1.php [QSA,L]
         RewriteRule ^(.*)$ /index.php/$1 [L]
 	RewriteRule ^(.*)/index\.php$  $1\.php
 </IfModule>
-php_flag display_errors off
 
 <files get_user_data.php>
 Order deny,allow
@@ -39,5 +38,3 @@ deny from all
 Order deny,allow
 deny from all
 </files>
-
-php_flag register_globals 0

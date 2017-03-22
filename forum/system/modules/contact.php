@@ -15,8 +15,10 @@
   <div class="registerMain">
 <img src="./images/graphics/contact.png">
 <p>Quelle: <em><a rel="nofollow" href="http://www.e-recht24.de">http://www.e-recht24.de</a></em></p>
+<p>Die Nutzung der Grafiken von World of Warcraft: Legion erfolgt unter den Nutzungsbestimmungen von Blizzard Entertainment.</p>
   </div>
   </div>
- </div>';
+ </div>
+ ';
 echo $registerContainer;  
   ?>

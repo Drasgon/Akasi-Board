@@ -92,7 +92,7 @@ switch($page) {
 			$secureUser = mysqli_real_escape_string($GLOBALS['connection'], $_GET['User']);
 			$getUser = $main->getUserdata($secureUser);
 			
-			if($getUser) {
+			if($getUser && $getUser['accepted'] == 1) {
 				$page_link = '/?page=Profile&User='.$secureUser.'';
 				$title = $getUser["name"];
 				$imgSrc = substr($getUser["avatar"], 2);
@@ -102,6 +102,11 @@ switch($page) {
 					$profile = mysqli_fetch_object($getProfile);
 					if($profile)
 						$description = strip_tags($profile->about);
+			}
+			else // If user does not exist or was banned / not accepted
+			{
+				$page_link = '/?page=Portal';
+				$title 		=	'Portal';
 			}
 			
 		}
@@ -131,18 +136,39 @@ switch($page) {
 if (isset($page) && $page == "Index") {
 
 	if (isset($_GET['boardview'])) {
-		$fetchBoard = $db->query("SELECT title FROM $db->table_boards WHERE id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['boardview'])."')");
-		if($board = mysqli_fetch_object($fetchBoard))
+		
+		$boardID = mysqli_real_escape_string($GLOBALS['connection'], $_GET['boardview']);
+		
+		$fetchBoard = $db->query("SELECT title FROM $db->table_boards WHERE id=('".$boardID."')");
+		if($board = mysqli_fetch_object($fetchBoard)) {
 			$title = $board->title;
+			if($main->boardConfig($boardID, 'member_exclusive') == 1)
+			{
+				$title = 'Error';
+				$description = $errorString;
+			}
+			else
+				$description = $main->closetags($board->title);
+		}
 		else
+		{
 			$title = $errorString;
+			$description = $errorDesc;
+		}
 	}
 			
 	if (isset($_GET['threadID'])) {
-		$fetchThread = $db->query("SELECT a.title, b.text FROM $db->table_thread a,$db->table_thread_posts b WHERE a.id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."') AND b.thread_id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."')");
+		$fetchThread = $db->query("SELECT a.title, a.main_forum_id, b.text FROM $db->table_thread a,$db->table_thread_posts b WHERE a.id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."') AND b.thread_id=('".mysqli_real_escape_string($GLOBALS['connection'], $_GET['threadID'])."')");
 		if($thread = mysqli_fetch_object($fetchThread)) {
 			$title = $thread->title;
-			$description = $main->closetags($thread->text);
+			$boardID = $thread->main_forum_id;
+			if($main->boardConfig($boardID, 'member_exclusive') == 1)
+			{
+				$title = 'Error';
+				$description = $errorString;
+			}
+			else
+				$description = $main->closetags($thread->text);
 		}
 		else
 		{

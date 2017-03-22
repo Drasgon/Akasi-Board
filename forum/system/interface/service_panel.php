@@ -27,7 +27,7 @@ if (!isset($db) || $db == NULL)
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
     
     
     $userData = $main->getUserdata($_SESSION['ID'], "sid");
@@ -100,7 +100,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 </div>
 <div class="search">
 	  <form method="POST" action="?page=Search">
-		<input type="text" placeholder="Suchen ..." name="q">
+		<input type="text" placeholder="Suchen ..." name="q" maxlength="'.$main->serverConfig('max_search_length').'">
 		<input type="submit" class="submit" value="Suchen">
 	  </form>
 	</div>';

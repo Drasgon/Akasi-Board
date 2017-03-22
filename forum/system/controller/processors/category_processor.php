@@ -39,6 +39,7 @@ if (isset($_GET['ajaxSend']) && $_GET['ajaxSend'] == 'catLoad' && isset($_POST['
     $db->query("UPDATE $db->table_hiddenboards SET state='1' WHERE user_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')) AND cat_id=('" . $categoryContent . "')");
     
     $board_table = '';
+	
     $get_forums  = "SELECT id, icon, icon_id, title, description, closed FROM $db->table_boards WHERE category=('" . $categoryContent . "')";
     $forums_result = $db->query($get_forums) or die(mysql_error());
     while ($forums = mysqli_fetch_object($forums_result)) {
@@ -68,7 +69,7 @@ if (isset($_GET['ajaxSend']) && $_GET['ajaxSend'] == 'catLoad' && isset($_POST['
             
             $totalRows_unreads = mysqli_fetch_row($statusQuery_ID);
             
-            if ($totalRows_threads == $totalRows_unreads || (!isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] == false)) {
+            if ($totalRows_threads == $totalRows_unreads || (!isset($_SESSION['STATUS']) || $_SESSION['STATUS'] == false)) {
                 $boardUnread_status = false;
             } else {
                 $boardUnread_status = true;
@@ -126,50 +127,58 @@ if (isset($_GET['ajaxSend']) && $_GET['ajaxSend'] == 'catLoad' && isset($_POST['
         }
         
         $board_table .= '
-
-
-<li>
-<div class="boardList">
-<div class="innerListTitle">
-<div class="BoardListIcon">
-<img src="' . $board_icon . '" alt="">
-</div>
-<div class="BoardListTitleContent">
-<h4 class="boardTitle ' . $board_titleClass . '">
-<a href="?page=Index&boardview=' . $board_id . '" title="Zum Board ' . $board_title . ' springen.">
-' . $board_title . '
-</a>
-</h4>
-<p class="desc specialP">
-' . $board_description . '
-</p>
-</div>
-</div>
-<div class="boardThreadData">
-<h4 class="boardTitle" ' . $board_titleClass . '>';
-        if (!$num_LastThread <= 0) {
-            $board_table .= '
-<a href="?page=Index&threadID=' . $lastThreadID . '" title="Zum Thread ' . $lastThreadTitle . ' springen.">
-' . $lastThreadTitle . '
-</a>';
-        }
-        $board_table .= '
-</h4>
-<p class="desc specialP">
-' . $msg . ' ' . $failMsg . ' 
-<a href="?page=Profile&amp;User=' . $lastThreadAuthor . '">
-' . $lastThreadAuthorName . '</a>
-<span class="lastPostDateCon">  ' . $lastThreadReply . '  </span>
-</p>
-</div>
-</div>
-</li>
-';
+			<li>
+				<div class="boardList">
+					<div class="innerListTitle">
+						<div class="BoardListIcon">
+							<div class="icons" id="forumicon"></div>
+						</div>
+						<div class="BoardListTitleContent">
+							<h4 class="boardTitle ' . $board_titleClass . '">
+							<a href="?page=Index&boardview=' . $board_id . '" title="Zum Board ' . $board_title . ' springen.">
+							' . $board_title . '
+							</a>
+							</h4>
+							<p class="desc specialP">
+							' . $board_description . '
+							</p>
+						</div>
+					</div>
+					<div class="boardThreadData">
+						<h4 class="boardTitle" ' . $board_titleClass . '>';
+								if (!$num_LastThread <= 0) {
+									$board_table .= '
+									<a href="?page=Index&threadID=' . $lastThreadID . '" title="Zum Thread ' . $lastThreadTitle . ' springen.">
+									' . $lastThreadTitle . '
+									</a>';
+								}
+								$board_table .= '
+						</h4>
+						<p class="desc specialP">
+							' . $msg . ' ' . $failMsg . ' 
+							<a href="?page=Profile&amp;User=' . $lastThreadAuthor . '">
+							' . $lastThreadAuthorName . '</a>
+							<span class="lastPostDateCon">  ' . $lastThreadReply . '  </span>
+						</p>
+					</div>
+				</div>
+			</li>';
+			
+			
+		if($main->boardConfig($board_id, 'member_exclusive') == 1)
+		{
+			if(isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == TRUE)
+			{
+				echo $board_table;
+			}
+		}
+		else if($main->boardConfig($board_id, 'member_exclusive') == 0)
+		{
+			echo $board_table;
+		}
     }
     mysqli_free_result($forums_result);
     
-    
-    echo $board_table;
 } else {
     throw new HttpException(500, "Database Error");
 }

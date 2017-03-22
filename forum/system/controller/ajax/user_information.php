@@ -49,34 +49,22 @@ if (isset($_GET['ajaxSend']) && $_GET['ajaxSend'] == 'getuserinfo' && isset($_PO
 	
 	$data = mysqli_real_escape_string($connection, $_POST['loadData']);
 	
-	$getUser = $db->query("SELECT username, gender, avatar, post_counter, user_title, messenger_skype FROM $db->table_accdata WHERE account_id=('".$data."') LIMIT 1");
-		while($user = mysqli_fetch_object($getUser)) {
-			$username = $user->username;
-			$gender = $user->gender;
-			$avatar = $user->avatar;
-			$post_counter = $user->post_counter;
-			$user_title = $user->user_title;
-			$messenger_skype = $user->messenger_skype;
-		}
-	$getOnline = $db->query("SELECT online FROM $db->table_sessions WHERE id=('".$data."') LIMIT 1");
-		while($user = mysqli_fetch_object($getOnline)) {
-			$online = $user->online;
-		}
+	$getUser = $main->getUserdata($data, "account_id");
+		$username 				= $getUser['name'];
+		$gender 				= $getUser['gender'];
+		$avatar 				= $main->checkUserAvatar($getUser['avatar']);
+		$memberAvatar_border 	= $getUser['avatar_border'];
+		$post_counter 			= $getUser['posts'];
+		$user_title 			= $getUser['title'];
+		$messenger_skype 		= $getUser['msngr_skype'];
+		$online 				= $main->buildOnlineStatus($getUser['online'], $username);
+		
 		
 	if($messenger_skype == NULL) {
 		$messenger_skype = '';
 	} else {
 		$messenger_skype = 'Skype: '.$messenger_skype.'<br><br><a href="skype:'.$messenger_skype.'?userinfo" title="Profil aufrufen"><img src="http://mystatus.skype.com/'.$messenger_skype.'" alt="" width="90"></a>';
 	}
-		
-		switch($online) {
-			case '0':
-				$onlineIcon = './images/icons/offlineS.png';
-				break;
-			case '1':
-				$onlineIcon = './images/icons/onlineS.png';
-				break;
-		}
 		
 			switch($gender) {
 			
@@ -97,12 +85,12 @@ echo '
     	<div class="userInformation">
       <ul>
         <li class="userAvatar_profile">
-		<img src="'.$avatar.'" width="150">
+		<img src="'.$avatar.'" width="150" class="user_avatar_global_border img-zoom" style="border:5px solid rgba('.$memberAvatar_border.')">
         </li>
         <li class="DetailUserInfo">
 			<div class="userCredits">
 				<p>
-				<img src="'.$onlineIcon.'">
+				'.$online.'
 				'.$username.'
 				</p>
 				<p>

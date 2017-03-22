@@ -1,0 +1,6 @@
+open ni204675_1@vweb17.nitrado.net
+option exclude "index.php"
+synchronize local E:\TEMP_WINSCP\ asa/
+option include "index.php"
+get "asa/index.php" "E:\TEMP_WINSCP\index_%TIMESTAMP#dd.mm.yyyy_hh.nn.ss%_Automated.php"
+close

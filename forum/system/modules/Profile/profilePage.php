@@ -7,6 +7,15 @@ if (!isset($db) || $db == NULL)
 }
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
+
+	$main->UseFile('./system/interface/errorpage_cc.php');
+	
+	if(!isset($_SESSION) || (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == FALSE))
+	{
+		ThrowError_cC('Sie haben nicht die notwendigen Berechtigungen, um auf diese Seite zuzugreifen!');
+		
+		return;
+	}
 	
 if (isset($_GET['page']) && $_GET['page'] == 'Profile' && isset($_GET['User']) && !empty($_GET['User'])) {
 
@@ -19,46 +28,50 @@ if (isset($_GET['page']) && $_GET['page'] == 'Profile' && isset($_GET['User']) &
 	}
 	
 
-			$getUser = $db->query("SELECT username,gender,avatar,post_counter,email,user_title,user_rank,signature,login_status FROM $db->table_accdata WHERE account_id=('".$secureUser."')");
-			if(mysqli_num_rows($getUser) < 1) {
-				require('./system/interface/errorpage_cC.php');
+			// $getUser = $db->query("SELECT username,gender,avatar,post_counter,email,user_title,user_rank,signature,login_status FROM $db->table_accdata WHERE account_id=('".$secureUser."')");
+			$userData = $main->getUserdata($secureUser, "account_id");
+			if(!$userData || $userData['accepted'] == 0) {
 				ThrowError_cC('Der gesuchte User existiert nicht!');
-				}
-			if(mysqli_num_rows($getUser) > 1) ThrowError_cC('Ungültiger Link! Bitte überprüfen Sie die Schreibweise der URL oder versuchen Sie es später erneut. Sollte dieser Fehler weiterhin auftreten, wenden Sie sich an die Administration.');
-			if(mysqli_num_rows($getUser) == 1) {
-				$catchData = mysqli_fetch_object($getUser);
-					$username = $catchData->username;
-					$gender = $catchData->gender;
-					$avatar = $catchData->avatar;
-					$post_counter = $catchData->post_counter;
-					$email = $catchData->email;
-					$user_title = $catchData->user_title;
-					$signature = $catchData->signature;
-					$login_status = $catchData->login_status;
-					$accLevel_icon = './images/icons/ranks/rank1.png';
+			}
+			else
+			{
+			// if(mysqli_num_rows($userData) > 1) ThrowError_cC('Ungültiger Link! Bitte überprüfen Sie die Schreibweise der URL oder versuchen Sie es später erneut. Sollte dieser Fehler weiterhin auftreten, wenden Sie sich an die Administration.');
 				
+					$accountID    		= $userData['account_id'];
+					$username 			= $userData['name'];
+					$avatar  			= $userData['avatar'];
+					$avatarBorder 		= $userData['avatar_border'];
+					$gender 			= $userData['gender'];
+					$post_counter 		= $userData['posts'];
+					$email 				= $userData['email'];
+					$user_title 		= $userData['title'];
+					$signature 			= $userData['signature'];
+					$character_name 	= $userData['character_name'];
+					$character_realm 	= $userData['character_realm'];
+					$accLevel_icon 		= '';
+					$rank 				= $main->calculateRank(0, 0, $accountID);
+					
+					$armory_link = $main->buildArmoryLink($character_realm, $character_name);
+					// $accLevel_icon 	= '<img src="./images/icons/ranks/rank1.png" width="15" height="22">';
 				
 				$getuserActivity = $db->query("SELECT online FROM $db->table_sessions WHERE id=('".$secureUser."')");
 						$useractivity = mysqli_fetch_object($getuserActivity);
 							$memberOnline = $useractivity->online;
 						
-						if($memberOnline == '0')
-							$userStatusImg = '<div class="icons_small" id="offline" title="'.$username.' ist grade offline"></div>';
-						else
-							$userStatusImg = '<div class="icons_small" id="online" title="'.$username.' ist grade online"></div>';
+						$userStatusImg = $main->buildOnlineStatus($memberOnline, $username);
 				
 				$getProfile = $db->query("SELECT location, hobbies, about, msngr_skype, msngr_icq, sn_facebook, sn_twitter, sn_googleplus, sn_tumblr FROM $db->table_profile WHERE id=('".$secureUser."') LIMIT 1");
 					$profile = mysqli_fetch_object($getProfile);
-						$location = $profile->location;
-						$hobbies = $profile->hobbies;
-						$about = $profile->about;
-						$msngr_skype = $profile->msngr_skype;
-						$msngr_icq = $profile->msngr_icq;
-						$sn_facebook = $profile->sn_facebook;
-						$sn_twitter = $profile->sn_twitter;
-						$sn_googleplus = $profile->sn_googleplus;
-						$sn_tumblr = $profile->sn_tumblr;
-			}
+						$location 		= $profile->location;
+						$hobbies 		= $profile->hobbies;
+						$about 			= $profile->about;
+						$msngr_skype 	= $profile->msngr_skype;
+						$msngr_icq 		= $profile->msngr_icq;
+						$sn_facebook 	= $profile->sn_facebook;
+						$sn_twitter 	= $profile->sn_twitter;
+						$sn_googleplus 	= $profile->sn_googleplus;
+						$sn_tumblr 		= $profile->sn_tumblr;
+			
 			
 			if(empty($about) || $about == '')
 				$about = '<span class="profile_about_no_informations">Dieser Nutzer hat noch keine Informationen über sich angegeben.</span>';
@@ -77,12 +90,15 @@ if (isset($_GET['page']) && $_GET['page'] == 'Profile' && isset($_GET['User']) &
 				
 				case 1:
 					$authorGenderImg = './images/icons/undefinedGender.png';
+					$authorGenderText = ' hat noch kein Geschlecht angegeben.';
 					break;
 				case 2:
 					$authorGenderImg = './images/icons/female.png';
+					$authorGenderText = ' ist Weiblich.';
 					break;
 				case 3:
 					$authorGenderImg = './images/icons/male.png';
+					$authorGenderText = ' ist Männlich.';
 					break;
 				}
 				
@@ -92,6 +108,7 @@ if (isset($_GET['page']) && $_GET['page'] == 'Profile' && isset($_GET['User']) &
 	<div class="profileMainContainer">
 	  <div class="mainHeadline">
 		<div class="headlineContainer">
+			'.$armory_link.'
 		  <h2>
 			Profil von »'.$username.'«
 		  </h2>
@@ -101,7 +118,7 @@ if (isset($_GET['page']) && $_GET['page'] == 'Profile' && isset($_GET['User']) &
 		<div class="userInformation">
 		  <ul>
 			<li class="userAvatar_profile">
-				<img src="'.$avatar.'" width=150>
+				<img src="' . $avatar . '"  height="120px" class="UserImage user_avatar_global_border img-zoom" style="border:5px solid rgba('.$avatarBorder.')">
 			</li>
 			<li class="DetailUserInfo">
 				<div class="userCredits">
@@ -112,11 +129,11 @@ if (isset($_GET['page']) && $_GET['page'] == 'Profile' && isset($_GET['User']) &
 					<div>
 						'.$user_title.'
 					</div>
-					<div>
-						<img src="'.$accLevel_icon.'" width="15" height="22">
+					<div class="userRank" title="'.$rank[2].', Rang '.$rank[0].'">
+						'.$rank[1].'
 					</div>
 					<div>
-						<img src="'.$authorGenderImg.'">
+						<img src="'.$authorGenderImg.'" title="'.$username.' '.$authorGenderText.'">
 					</div>
 					<div>
 						'.$messenger_skype.'
@@ -137,6 +154,6 @@ if (isset($_GET['page']) && $_GET['page'] == 'Profile' && isset($_GET['User']) &
 	</div>';
 
 	echo $userDataString;
-
+			}
 }
 ?>

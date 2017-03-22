@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2015  Alexander Bretzke
+Copyright (C) 2016  Alexander Bretzke
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ $totalGenerateTime = microtime(TRUE);
 				<meta http-equiv="content-type" content="text/html; charset=utf-8">
 				<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 				<meta http-equiv="Pragma" content="no-cache" />
-				<meta http-equiv="Expires" content="0" />';
+				<meta http-equiv="Expires" content="3600" />';
 				
 				include('includes/controller/processors/title_processor.php');
 				
@@ -50,16 +50,24 @@ $totalGenerateTime = microtime(TRUE);
 				<meta name="viewport" content="width=device-width, initial-scale=1">
 				<meta http-equiv="Content-Language" content="at, de, ch">
 				<meta name="language" content="deutsch, de, at, ch">
+				<link rel="shortcut icon" href="favicon.ico">
+				<link defer rel="stylesheet" href="css/unslider.css">
+				<link defer rel="stylesheet" href="css/unslider-dots.css">
 				<link defer rel="stylesheet" href="css/style.css">
 				<link defer rel="stylesheet" href="css/mobile.css">
-				<link rel="shortcut icon" href="favicon.ico">
+				<!-- Prevent page being included in iframe -->
+				<script type="text/JavaScript">
+					if(self != top)
+						top.location.replace(self.location.href);
+				</script>
 				<script src="//code.jquery.com/jquery-latest.min.js"></script>
-				<script src="//unslider.com/unslider.min.js"></script>
-				<script src="js/isInViewport.min.js"></script>
-				<script src="js/frame-control.js"></script>
+				<script async src="js/unslider.js"></script>
+				<script async src="js/jquery.cookie.js"></script>
+				<script async src="js/isInViewport.min.js"></script>
+				<script async src="js/frame-control.js"></script>
 			</head>';
 			
-	if(!isset($_COOKIE['firstVisit']) || (isset($_COOKIE['firstVisit']) && empty($_COOKIE['firstVisit'])))
+	/*if(!isset($_COOKIE['firstVisit']) || (isset($_COOKIE['firstVisit']) && empty($_COOKIE['firstVisit'])))
 	{
 		echo '
 			<script>
@@ -84,14 +92,52 @@ $totalGenerateTime = microtime(TRUE);
 		';
 		
 		setcookie("firstVisit", time(), time() + (3600*24), "/", NULL);
-	}
+	}*/
+	
+	$video_pool = ARRAY(
+		'highmountain',
+		'sv-ol'
+	);
+	$video_names = ARRAY(
+		'Hochberg',
+		'Shadowmoon Valley',
+		'Random'
+	);
+	
+	$default_option = 0;
+	
+	if(!isset($_COOKIE['bg_index']))
+		$_COOKIE['bg_index'] = $default_option;
+	
+	$video = (isset($_COOKIE['bg_index']) && $_COOKIE['bg_index'] >= 0 && $_COOKIE['bg_index'] != count($video_pool)) ? $_COOKIE['bg_index'] : rand(0,1);
+			
+		$options = '';
+		$checked = '';
+			
+		for($i = 0; $i < count($video_names); $i++)
+		{
+			if((isset($_COOKIE['bg_index']) && $i == $_COOKIE['bg_index']) || (!isset($_COOKIE['bg_index']) && $i == count($video_pool)))
+				$checked = 'selected';
+			else
+				$checked = '';
+			
+				$options .= '
+					<option value="'.$i.'" '.$checked.'>
+						'.$video_names[$i].'
+					</option>';
+		}
 			
 	echo '
 			<body>
+				<div class="background_select">
+					<select onchange="backgroundChanged(this.value)">
+						'.$options.'
+					</select>
+				</div>
 				<div class="background" id="background" data-stellar-background-ratio="0.2">
-					<video autoplay loop poster="img/bg/sv-ol.jpg">
-					  <source src="img/bg/video/sv-ol.mp4" type="video/mp4">
-					  <source src="img/bg/video/sv-ol.webm" type="video/webm">
+					<video autoplay loop poster="img/bg/'.$video_pool[$video].'.jpg" id="background_video">
+					  <source src="img/bg/video/'.$video_pool[$video].'.mp4" type="video/mp4" id="bg_mp4">
+					  <source src="img/bg/video/'.$video_pool[$video].'.webm" type="video/webm" id="bg_webm">
 					Your browser does not support the video tag.
 					</video>
 				</div>';
@@ -104,31 +150,33 @@ $totalGenerateTime = microtime(TRUE);
 							<ul>
 								<li class="banner_slider_description">
 									<span>
-										Genug von der Garnison?<br>
-										Wir auch!
+										Gul\'dan wurde ausgelöscht! (erneut)
 									</span>
-									<video autoplay loop muted class="banner_video">
-									  <source src="img/gfx/slider/1.mp4" type="video/mp4">
-									  <source src="img/gfx/slider/1.webm" type="video/webm">
-									</video>
+									  <img src="img/gfx/slider/guldan_kill.jpg">
 								</li>
 								<li class="banner_slider_description">
 									<span>
-										Deswegen sind wir gerne in Azeroth, oder aber auch anderen Universen unterwegs!
+										Helya war gestern!
 									</span>
-									<video autoplay loop muted class="banner_video">
-									  <source src="img/gfx/slider/2.mp4" type="video/mp4">
-									  <source src="img/gfx/slider/2.webm" type="video/webm">
-									</video>
+									  <img src="img/gfx/slider/kill.jpg">
 								</li>
 								<li class="banner_slider_description">
 									<span>
-										Vor allem dieser Platz lässt uns jedes mal vor Freude strahlen.
+										Es gibt jedoch immernoch eine Menge neuer Feinde zu bekämpfen.
 									</span>
-									<video autoplay loop muted class="banner_video">
-									  <source src="img/gfx/slider/3.mp4" type="video/mp4">
-									  <source src="img/gfx/slider/3.webm" type="video/webm">
-									</video>
+										<img src="img/gfx/slider/far.jpg">
+								</li>
+								<li class="banner_slider_description">
+									<span>
+										Aber dennoch mächtige, uralte Verbündete.
+									</span>
+										<img src="img/gfx/slider/senegos.jpg">
+								</li>
+								<li class="banner_slider_description">
+									<span>
+										Der Alptraum ist jedoch ebenfalls zurückgekehrt . . .
+									</span>
+										<img src="img/gfx/slider/tyrande.jpg">
 								</li>
 							</ul>
 						</div>';
@@ -153,6 +201,9 @@ $totalGenerateTime = microtime(TRUE);
 					
 	echo '
 			</body>
+			<style type="text/css" rel="stylesheet">
+					@import url(https://fonts.googleapis.com/css?family=Lato:400,300italic,400italic,700);
+			</style>
 		</html>';
 		
 	// End of the output buffering. Also the end of all content. Cookies can't be set after this.

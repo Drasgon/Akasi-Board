@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css?family=Baloo+Bhaina');
+
+.bosshealth {
+	font-family: 'Baloo Bhaina', cursive;
+}
+
+.bosshealth h2 {
+	text-decoration:underline;
+	margin-bottom: 15px;
+	color: #1e8c46;
+}
+
+.bossSelect img {
+	float:none!important;
+	height:75px!important;
+	border-radius:10px!important;
+}
+
+.bossSelect li {
+	margin:15px;
+	text-align:center;
+}
+
+.bossSelect a {
+	text-decoration:none!important;
+}
+
+.bossSelect a > span {
+	margin-bottom:5px;
+}
+
+.bosshealth img, .bossSelect img {
+	position:relative;
+	height:250px;
+	float:right;
+	border-radius:50px;
+	box-shadow:5px 5px 10px #000;
+	border:3px groove green;
+}
+
+.bosshealth table {
+	width:100%;
+	border-collapse: collapse;
+}
+
+.bosshealth th {
+	padding: 20px 0px 20px 0px;
+	border-bottom: 5px solid #166730;	
+}
+
+.bosshealth td {
+	text-align: center;
+	padding:10px 0 10px 0;
+}
+
+.playerList:hover {
+	background-color: rgba(60, 125, 58, 0.39);
+}

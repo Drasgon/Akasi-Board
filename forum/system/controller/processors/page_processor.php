@@ -33,8 +33,8 @@ $forumActive   = (isset($_GET['page']) && $_GET['page'] == 'Index' || (isset($_G
 $membersActive = (isset($_GET['page']) && $_GET['page'] == 'Members') ? 'class="active"' : '';
 $galleryActive = (isset($_GET['page']) && $_GET['page'] == 'Gallery') ? 'class="active"' : '';
 ?>  
-  <div class=page>
-    <div class="header">
+  <div class="page scene_element" id="page">
+    <div class="header scene_element scene_element--fadein">
 		<div class="infoline_header">
 			<ul class="infoline_content">
 				<!--<li class="socialbar">
@@ -54,7 +54,7 @@ $galleryActive = (isset($_GET['page']) && $_GET['page'] == 'Gallery') ? 'class="
 				</li>-->
 				
 				<?php
-				if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+				if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 				
 				echo '
 				
@@ -81,7 +81,7 @@ $galleryActive = (isset($_GET['page']) && $_GET['page'] == 'Gallery') ? 'class="
 				<li class="infoline_optionsbar">
 					<ul class="infoline_userOptions">
 						<li>
-							<a href="?page=Login">Anmelden</a>
+							<a href="?page=Login" class="no-smoothstate">Anmelden</a>
 						</li>
 						<li>
 							<a href="?page=Register">Registrieren</a>
@@ -94,7 +94,7 @@ $galleryActive = (isset($_GET['page']) && $_GET['page'] == 'Gallery') ? 'class="
 				echo $optionsvisitor;
 				}
 				
-				if (isset($_SESSION['adminAccess']) && $_SESSION['adminAccess'] == true) {
+				if ($main->checkSessionAccess('ADMIN') || $main->checkSessionAccess('MOD')) {
 					$adminbutton = '
 					<li class="infoline_adminoptions">
 						<a href="?page=Admin&amp;Tab=Verify">
@@ -134,7 +134,7 @@ $galleryActive = (isset($_GET['page']) && $_GET['page'] == 'Gallery') ? 'class="
 		$main->useFile('./system/controller/processors/service_panel.php');
 
 	// If client is not logged in, show draggable loginpanel.
-	if (!isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] == false) {
+	if (!isset($_SESSION['STATUS']) || $_SESSION['STATUS'] == false) {
     
     $main->useFile('./system/interface/loginPanel.php');
 }
@@ -148,7 +148,7 @@ $galleryActive = (isset($_GET['page']) && $_GET['page'] == 'Gallery') ? 'class="
 </div>
 
 
-    <div class="main">
+    <div class="main scene_element scene_element--fadeinleft">
 		<div class="mainNavigation">
 			<div class="mainNavigationInner">
 				<ul>
@@ -206,9 +206,10 @@ $main->useFile('./system/controller/processors/breadcrumbs_processor.php');
 ?>
 		</div>
 		<?php
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
     
     $new_savedThread = '';
+	$data_available = FALSE;
     
     $checkForSaved = $db->query("SELECT token, board_id, title, content FROM $db->table_thread_saves WHERE user_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
     
@@ -224,17 +225,23 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 		<ul>';
         
         while ($savedThreads = mysqli_fetch_object($checkForSaved)) {
-            
+			
             $token    = $savedThreads->token;
             $board_id = $savedThreads->board_id;
             $title    = $savedThreads->title;
             $content  = $savedThreads->content;
-            
-            $new_savedThread .= '
 			
-			<li><a href="?page=Index&boardview=' . $board_id . '&form=threadAdd&token=' . $token . '">' . $board_id . ': ' . $title . '</a> <div class="icons" id="delsavthread_scaled" title="Gespeichertes Thema löschen"></div></li>
-
-	';
+			if(!empty($title) && !empty($content))
+			{
+				$new_savedThread .= '
+				
+				<li><a href="?page=Index&boardview=' . $board_id . '&form=threadAdd&token=' . $token . '">' . $board_id . ': ' . $title . '</a> <div class="icons" id="delsavthread_scaled" title="Gespeichertes Thema löschen"></div></li>
+				';
+				
+				$data_available = TRUE;
+			}
+			else
+				$data_available = FALSE;
         }
         
         $new_savedThread .= '
@@ -243,7 +250,8 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 	</div>
 	</div>';
         
-        echo $new_savedThread;
+		if($data_available == TRUE)
+			echo $new_savedThread;
     }
     
     $new_savedPost = '';
@@ -252,6 +260,9 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
     
     if (mysqli_num_rows($checkForSavedPosts) >= 1) {
         
+		
+		$data_available = FALSE;
+		
         $new_savedPost .= '
 	<div class="userInfobox" id="saved_posts_container">
 	  <div class="userInfobox_inner">
@@ -273,11 +284,18 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
                 
             }
             
-            $new_savedPost .= '
-			
-			<li><a href="?page=Index&threadID=' . $thread_id . '&form=postAdd&token=' . $token . '">' . $thread_name . '</a> <img src="./images/icons/delete_scaled.png" class="saved_post_delete_selected" id="' . $token . '" title="Gespeichertes Thema löschen" width=20 height=20></li>
+			if(!empty($token) && !empty($thread_id) && !empty($content))
+			{
+				$new_savedPost .= '
+				
+				<li><a href="?page=Index&threadID=' . $thread_id . '&form=postAdd&token=' . $token . '">' . $thread_name . '</a> <img src="./images/icons/delete_scaled.png" class="saved_post_delete_selected" id="' . $token . '" title="Gespeichertes Thema löschen" width=20 height=20></li>
 
-	';
+				';
+				
+				$data_available = TRUE;
+			}
+			else
+				$data_available = FALSE;
         }
         
         $new_savedPost .= '
@@ -287,7 +305,8 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 	</div>
 	</div>';
         
-        echo $new_savedPost;
+		if($data_available == TRUE)
+			echo $new_savedPost;
     }
 }
 
@@ -297,38 +316,7 @@ $main->useFile('./system/controller/processors/page_container_processor.php');
 
 /*  <---- Main Files END ---->  */
 
-$page = "default";
-if(isset($_GET["page"]))
-$page = $_GET["page"];
 
-switch ($page) {
-    case 'Message':
-        $main->useFile('./system/modules/Message/messageSystem.php');
-        break;
-    case 'Profile':
-        if (isset($_GET['Tab']) && $_GET['Tab'] == 'Edit') {
-            $main->useFile('./system/modules/Profile/profile_edit.php');
-        } else {
-            $main->useFile('./system/modules/Profile/profilePage.php');
-        }
-        break;
-    case 'tos':
-		global $tos_string;
-        $main->useFile('./system/interface/tos.php');
-			echo '<div class="tosContainer">'.$tos_string.'</div>';
-        break;
-    case 'contact':
-        $main->useFile('./system/modules/contact.php');
-        break;
-    case 'PrivacyPolicy':
-        $main->useFile('./system/modules/privacypolicy.php');
-        break;
-    case 'Admin':
-        if (isset($_SESSION['adminAccess']) && $_SESSION['adminAccess'] == true) {
-			$main->useFile('./system/modules/admin.php');
-        }
-        break;
-}
 $counter = '0';
 
 $footer         = '

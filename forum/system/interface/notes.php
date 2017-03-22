@@ -1,7 +1,7 @@
 <?php
 	global $langGlobal;
 	
-	if(isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true)
+	if(isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true)
 	{
 
 		// Re initialize the DB and Runtime Class
@@ -13,7 +13,7 @@
 		if (!isset($main) || $main == NULL)
 			$main = new Board($db, $connection);
 			
-			
+			# URI's that can be used to redirect to the page of specific content
 			$indexURI 		= '?page=Index';
 			$profileURI 	= '?page=Profile';
 			$galleryURI 	= '?page=Gallery';
@@ -43,7 +43,7 @@
 				</div>
 			</div>';
 			
-			$data_query = $db->query("SELECT id, sender, receiver, priority, note_type, refer_to, time_sent, read_state FROM ".$db->table_notes." WHERE receiver='".$_SESSION['userid']."' AND priority<=(SELECT account_level FROM (".$db->table_accounts.") WHERE sid=('".$_SESSION['ID']."')) ORDER BY read_state ASC");
+			$data_query = $db->query("SELECT id, sender, receiver, priority, note_type, refer_to, time_sent, read_state FROM ".$db->table_notes." WHERE receiver='".$_SESSION['USERID']."' AND priority<=(SELECT account_level FROM (".$db->table_accounts.") WHERE sid=('".$_SESSION['ID']."')) ORDER BY read_state ASC");
 				while($data = mysqli_fetch_object($data_query))
 				{
 					$id 			= $data->id;

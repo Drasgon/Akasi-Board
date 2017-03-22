@@ -27,7 +27,9 @@ if (!isset($db) || $db == NULL)
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+echo '<a href="?page=Index"><div class="logo_img img-zoom"></div></a>';
+
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
     
     
     $userData = $main->getUserdata($_SESSION['ID'], "sid");
@@ -35,6 +37,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
         $accID_sP    = $userData['account_id'];
         $username_sP = $userData['name'];
         $avatar_sP   = $userData['avatar'];
+		$memberAvatar_border = $userData['avatar_border'];
 		
 		if(!$main->checkImage($avatar_sP))
 		{
@@ -42,7 +45,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 		}
 		
 		$_SESSION['accountid'] = $accID_sP;
-		$_SESSION['username'] = $username_sP;
+		$_SESSION['USERNAME'] = $username_sP;
 		$_SESSION['avatar'] = $avatar_sP;
         
         $profileClass = (isset($_GET['page']) && $_GET['page'] == 'Profile' && (isset($_GET['Tab']) && $_GET['Tab'] == 'Edit') && !isset($_GET['User'])) ? 'userPanelOptionBarImage-active' : 'userPanelOptionBarImage';
@@ -55,7 +58,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 <div class="ServicePanel">
 	<div class="innerPageHeadline">
 		<p class="logout_servicepanel">	
-			<a id="openLogout">	
+			<a id="openLogout" class="no-smoothstate">	
 				' . $langGlobal['sPLogout'] . '
 			</a>
 		</p>
@@ -68,7 +71,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 
 		<div class="UserImg">
 			<a href="?page=Account&Tab=account&subPage=avatar">
-			  <img src="' . $_SESSION['avatar'] . '"  height="120px" class="UserImage">
+			  <img src="' . $_SESSION['avatar'] . '"  height="120px" class="UserImage user_avatar_global_border img-zoom" style="border:5px solid rgba('.$memberAvatar_border.')">
 			</a>
 		</div>
 
@@ -106,7 +109,7 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
 <div class="search">
 	  <form method="GET" action="?page=Search">
 		<input type="hidden" value="Search" name="page">
-		<input type="text" placeholder="Suchen ..." name="q">
+		<input type="text" placeholder="Suchen ..." name="q" maxlength="'.$main->serverConfig('max_search_length').'">
 		<input type="submit" class="submit" value="Suchen">
 	  </form>
 	</div>';
@@ -128,7 +131,7 @@ $visitorPanel = '
 		
 	<div class="service_panel_content">
 		<div class="UserImg">
-			<img src="'.$defaultAvatar.'" alt width="120px" height="120px" class="UserImage">
+			<img src="'.$defaultAvatar.'" alt width="120px" height="120px" class="UserImage user_avatar_global_border img-zoom">
 		</div>
 		
 		<div class="userPanelOptionBar">
@@ -144,7 +147,7 @@ $visitorPanel = '
 	<div class="search">
 	  <form method="GET" action="?page=Search">
 		<input type="hidden" value="Search" name="page">
-		<input type="text" placeholder="Suchen ..." name="q">
+		<input type="text" placeholder="Suchen ..." name="q" maxlength="'.$main->serverConfig('max_search_length').'">
 		<input type="submit" class="submit" value="Suchen">
 	  </form>
 	</div>';

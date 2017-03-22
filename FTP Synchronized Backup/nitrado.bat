@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\WinSCP\WinSCP.exe" /console /log="E:\!S!M!D!Y!T.log" /script="D:\Users\Ian\Documents\FTP Synchronized Backup\nitrado.txt"

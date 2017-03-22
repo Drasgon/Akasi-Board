@@ -4,23 +4,32 @@ $postEdit_differentAuthors = 'Dieser Beitrag ist nicht ihrem Account zugeordnet,
 
 function throwError_cc($ErrorPgMsg) {
 
-$errorString ='
-<div class="alertMain_cc">
-<center>
-<img src="./images/graphics/warning_detailed.png" width="70px" height="67px" class="warningImg">
-</center>
-<div class="innerWarning">
-<p>
-'.$ErrorPgMsg.'
-</p>
-<p>
-<a href="'.$_SERVER['HTTP_REFERER'].'" class="ErrorLink">
-Zurück zur vorherigen Seite
-</a>
-</p>
-</div>
-</div>';
 
-echo $errorString;
+	if(isset($_SERVER['HTTP_REFERER'])) {
+		$referer = $_SERVER['HTTP_REFERER'];
+	   }
+	else
+	{
+	   $referer = '?page=Portal';
+	}
+
+	$errorString ='
+		<div class="alertMain_cc">
+		<center>
+		<img src="./images/graphics/warning_detailed.png" width="70px" height="67px" class="warningImg">
+		</center>
+		<div class="innerWarning">
+		<p>
+		'.$ErrorPgMsg.'
+		</p>
+		<p>
+		<a href="'.$referer.'" class="ErrorLink">
+		Zurück zur vorherigen Seite
+		</a>
+		</p>
+		</div>
+		</div>';
+
+	echo $errorString;
 }
 ?>

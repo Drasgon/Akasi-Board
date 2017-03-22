@@ -16,10 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-ini_set('display_startup_errors',1);
-	ini_set('display_errors',1);
-	error_reporting(-1);
-
 // Re initialize the DB and Runtime Class
 if (!isset($db) || $db == NULL)
 {
@@ -40,9 +36,9 @@ echo '<div class="threadCon">';
 setlocale(LC_ALL, null);
 setlocale(LC_ALL, 'de_DE@euro', 'de_DE', 'deu_deu');
 
-if ((isset($_SESSION['angemeldet']) || $_SESSION['angemeldet'] = true) && isset($_SESSION['ID'])) {
+if ((isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) && isset($_SESSION['ID'])) {
       $checkIconSettings = $db->query("SELECT emoticons FROM $db->table_accdata WHERE account_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
-      while ($iconSettings = mysqli_fetch_object($checkIconSettings)) {
+      if ($iconSettings = mysqli_fetch_object($checkIconSettings)) {
             $emoticons = $iconSettings->emoticons;
       }
       if ($emoticons == '1') {
@@ -82,7 +78,7 @@ if ((!isset($_GET['form']) || !$_GET['form'] == 'postAdd' || $_GET['form'] == 'p
 	  $_SESSION['lastVisitedThread'][$currentThread][0] = time();
 	}
 }
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
       $checkforrequest = $db->query("SELECT request_id FROM $db->table_msg_request WHERE user_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')) AND thread_id=('" . $currentThread . "')");
       
       if (mysqli_num_rows($checkforrequest) == 0) {
@@ -90,12 +86,12 @@ if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
       }
 }
 
-$get_threadData   = "SELECT id, icon_id, title, rating, rating_votes, closed FROM $db->table_thread WHERE id=('" . $currentThread . "')";
+$get_threadData   = "SELECT id, icon_id, main_forum_id, title, rating, rating_votes, closed FROM $db->table_thread WHERE id=('" . $currentThread . "')";
 $threadDataResult = $db->query($get_threadData);
 
 if (mysqli_num_rows($threadDataResult) < 1) {
       $deprecatedLink = "Sie haben einen ungültigen oder nicht mehr gültigen Link aufgerufen.";
-      throwError($deprecatedLink);
+      $main->throwError($deprecatedLink);
       $threadExists = false;
 } else {
       $threadExists = true;
@@ -144,9 +140,17 @@ if (mysqli_num_rows($threadDataResult) < 1) {
                   $threadRating      = $threadData->rating;
                   $threadRatingVotes = $threadData->rating_votes;
                   $threadClosed      = $threadData->closed;
+				  $boardID			 = $threadData->main_forum_id;
                   
                   $thread_rating_ = '';
                   $voting         = '0';
+				  
+				  
+				if($main->checkBoardPermission($boardID, 0, 'Sie haben leider nicht die notwendigen Zugriffsrechte, um diese Seite zu besuchen.', '?page=Index') == false)
+				{
+					return;
+				}
+				
                   
                   if ($threadRatingVotes != '0' && $threadRating != '0') {
                         $threads_rating_calc   = $threadRating / $threadRatingVotes;
@@ -177,9 +181,9 @@ if (mysqli_num_rows($threadDataResult) < 1) {
                         $threadIcon = "./images/icons/thread_closed.png";
                   }
                   
-                  if ($threadClosed == 0) {
-                        if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
-                              $_SESSION['ID'] = session_id();
+                    if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
+						
+							$_SESSION['ID'] = session_id();
                               $getUser        = $db->query("SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')");
                               while ($userResult = mysqli_fetch_object($getUser)) {
                                     $userID = $userResult->id;
@@ -195,6 +199,8 @@ if (mysqli_num_rows($threadDataResult) < 1) {
                                     $db->query("INSERT INTO $db->table_forum_read (account_id,thread_id,board_id) VALUES ('" . $secureUserID . "', '" . $secureThreadID . "', (SELECT main_forum_id FROM $db->table_thread WHERE id=('" . $secureThreadID . "')))");
                                     $unread_status = true;
                               }
+						
+						if ($threadClosed == 0) {
                               
                               if ($unread_status == false) {
                                     $threadIcon = './images/icons/thread_def.png';
@@ -260,7 +266,7 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 							*/ ######
 							
 							if($pageNo > $page_value_UR)
-								throwError($pageErrorMsg);
+								$main->throwError($pageErrorMsg);
 							else {
 							
 								if ($page_value_UR > 1) {
@@ -392,10 +398,9 @@ if (mysqli_num_rows($threadDataResult) < 1) {
                   while ($threadData = mysqli_fetch_object($threadDataResult)) {
 							$postID     = $threadData->id;
 							$authorID   = $threadData->author_id;
-							$datePosted = $threadData->date_posted;
-							$dateEdited = $threadData->date_edited;
+							$datePosted = $main->convertTime($threadData->date_posted);
+							$dateEdited = $main->convertTime($threadData->date_edited);
 							
-							$datePosted = $main->convertTime($datePosted);
 							
 							$postText = $threadData->text;
                         if (isset($emoticons) && $emoticons == '1') {
@@ -410,23 +415,23 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 						{
 							$guestState = FALSE;
 							
-							$get_authorInfo   = "SELECT username,gender,avatar,post_counter,user_title,signature FROM $db->table_accdata WHERE account_id='" . $authorID . "'";
-							$authorResult     = $db->query($get_authorInfo);
-							$authorInfo       = mysqli_fetch_object($authorResult);
+							$authorInfo       = $main->getUserdata($authorID, "account_id");
 						}
 						else
 							$guestState = TRUE;
 						
-						if(!$guestState)
+						if(!$guestState && $authorInfo['accepted'] == 1)
 						{
-							$author           = $authorInfo->username;
-							$authorGender     = $authorInfo->gender;
-							$authorAvatar     = $authorInfo->avatar;
-							$author_postCount = $authorInfo->post_counter;
-							$author_title     = $authorInfo->user_title;
-							$author_signature = $authorInfo->signature;
+							$author           = $authorInfo['name'];
+							$authorGender     = $authorInfo['gender'];
+							$authorAvatar     = $authorInfo['avatar'];
+							$author_postCount = $authorInfo['posts'];
+							$author_title     = $authorInfo['title'];
+							$author_signature = $authorInfo['signature'];
+							$memberAvatar_border = $authorInfo['avatar_border'];
 							
 							$authorLink = ARRAY('<a href="?page=Profile&amp;User=' . $authorID . '" title="Profil von ' . $author . ' aufrufen.">', '</a>', 'title="Profil von ' . $author . ' aufrufen"');
+							$authorPostsLink = ARRAY('<a href="?page=Profile&amp;User=' . $authorID . '&amp;tab=posts">', '</a>');
 
 							$get_authorData = "SELECT location, about FROM $db->table_profile WHERE id='" . $authorID . "'";
 							$authorData     = $db->query($get_authorData);
@@ -436,14 +441,15 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 						}
 						else
 						{
-							$author = 'Gast';
-							$authorGender = 1;
-							$authorAvatar = '';
-							$author_postCount = 'n/A';
-							$author_title = 'Besucher';
-							$author_signature = '';
+							$author           = $authorInfo['name'];
+							$authorGender     = $authorInfo['gender'];
+							$authorAvatar     = $authorInfo['avatar'];
+							$author_postCount = $authorInfo['posts'];
+							$author_title     = $authorInfo['title'];
+							$author_signature = $authorInfo['signature'];
+							$memberAvatar_border = $authorInfo['avatar_border'];
 							$authorLink = ARRAY('', '', '');
-							$linkClose = '';
+							$authorPostsLink = ARRAY('', '');
 						}
 					
 						unset($authorLocation);
@@ -468,9 +474,9 @@ if (mysqli_num_rows($threadDataResult) < 1) {
                         }
                         
                         $getOnline = $db->query("SELECT online FROM $db->table_sessions WHERE id=('" . $authorID . "')");
-                        while ($online = mysqli_fetch_object($getOnline)) {
+							$online = mysqli_fetch_object($getOnline);
                               $author_status = $online->online;
-                        }
+                        
                         
                         switch ($authorGender) {
                               
@@ -492,11 +498,13 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 						{
 							if ($author_status == 0) {
 								  $authorStatusMsg = 'offline';
+								  $authorStatusMsgIcon = 'red';
 							} else {
 								  $authorStatusMsg = 'online';
+								  $authorStatusMsgIcon = 'green';
 							}
-							
-							$onlineStatus = '<div class="icons_small" id="' . $authorStatusMsg . '" title="' . $author . ' ist grade ' . $authorStatusMsg . '"></div>';
+
+							$onlineStatus = '<div class="'.$authorStatusMsgIcon.'_circle_small" title="'.$author.' ist grade '.$authorStatusMsg.'."></div>';
 						}
 						else
 						{
@@ -516,6 +524,21 @@ if (mysqli_num_rows($threadDataResult) < 1) {
                         } else {
                               $signature = '';
                         }
+						
+						if (!empty($dateEdited) && $dateEdited != NULL) {
+                              $postEdited = '
+								<div class="msgEdited">
+									<div>
+										Zuletzt bearbeitet: ' . $dateEdited . '
+									</div>
+								</div>';
+					
+                        } else {
+                              $postEdited = '';
+                        }
+						
+						$rank = $main->calculateRank(0, 0, $authorID);
+						
                         
                         $postRowData       = '
 
@@ -533,13 +556,13 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 				<p class="userTitle">
 					' . $author_title . '
 				</p>
-				<p class="userRank">
-					<img src="./images/icons/userRank1.png">
+				<p class="userRank" title="'.$rank[2].', Rang '.$rank[0].'">
+					'.$rank[1].'
 				</p>
 			</div>
 			<div class="userAvatar">
 				<div class="UserAvatarMsg">
-					'.$authorLink[0].'<img src="' . $authorAvatar . '" '.$authorLink[2].' class="' . $pngClass . '">'.$authorLink[1].'
+					'.$authorLink[0].'<img src="' . $authorAvatar . '" '.$authorLink[2].' class="' . $pngClass . ' img-zoom" style="border:5px solid rgba('.$memberAvatar_border.')">'.$authorLink[1].'
 				</div>
 			</div>
 			<div class="userIcons">
@@ -547,9 +570,9 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 			</div>
 			<div class="userCredits">
 				<p>
-					<a href="?page=Profile&amp;User=' . $authorID . '&amp;tab=posts">
+					'.$authorPostsLink[0].'
 						Beiträge: ' . $author_postCount . '
-					</a>
+					'.$authorPostsLink[1].'
 				</p>
 				<p>
 				' . $authorLocation . '
@@ -575,12 +598,12 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 			<div class="MsgMainCon">
 				' . $postTextParsed . '
 			</div>
+			' . $postEdited . '
 			' . $signature . '
-		
 		<div class="Thread-postOptions">
 			<ul>';
                         $checkUserIdentity = $db->query("SELECT author_id FROM $db->table_thread_posts WHERE author_id=(SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "')) AND id=('" . $postID . "')");
-                        if (isset($_SESSION['modAccess']) && $_SESSION['modAccess'] == true || mysqli_num_rows($checkUserIdentity) == '1') {
+                        if (isset($_SESSION['MODACCESS']) && $_SESSION['MODACCESS'] == true || mysqli_num_rows($checkUserIdentity) == '1') {
                               $postRowData .= '
 			<a href="?page=Index&threadID=' . $currentThread . '&postID=' . $postID . '&form=postEdit">
 			  <li>
@@ -589,7 +612,7 @@ if (mysqli_num_rows($threadDataResult) < 1) {
 			  </a>';
                         }
                         
-                        if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+                        if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
                               
                               $postRowData .= '
 							
@@ -622,97 +645,6 @@ if (mysqli_num_rows($threadDataResult) < 1) {
                         echo $postRowData;
                   }
             } else {
-                        if (isset($_GET['form']) && $_GET['form'] == 'postAdd')
-						{
-							if(isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true || $main->boardConfig($main->getThreadBoardID($currentThread), "guest_posts"))
-							{
-							
-								if (isset($_GET['action']) && $_GET['action'] == 'postAdd')
-								{
-											$main->useFile('./system/controller/board_controller/board_add_reply.php');
-											
-											addReply();
-								}
-								if (!isset($_GET['action']) || (isset($_GET['action']) && $_GET['action'] != 'postAdd'))
-								{
-									  
-									  $threadContainer = '
-										  <div class="post-addContainer">
-											<p>
-											  Einen neuen Beitrag erstellen
-										  </p>
-										  <fieldset class="PostAddLegend">
-											<legend>
-											  Beitrag
-											</legend>
-											<form method="POST" action="?page=Index&threadID=' . $_GET["threadID"] . '&form=postAdd&action=postAdd" class="postAddForm" id="postAddForm">';
-									  
-									  
-									  if (isset($_GET['token']) && !empty($_GET['token'])) {
-											$token = mysqli_real_escape_string($GLOBALS['connection'], $_GET['token']);
-											$query = $db->query("SELECT content FROM $db->table_post_saves WHERE token = ('" . $token . "') AND user_id = (SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
-											
-											while ($results = mysqli_fetch_object($query)) {
-												  $content = $results->content;
-												  
-											}
-									  }
-									  if (!isset($_GET['token']))
-											$content = '';
-									  
-									  $threadContainer .= '
-										  <textarea type="hidden" id="postAddArea" name="postAddArea"> 
-											' . $content . '
-										  </textarea>
-											<script type="text/javascript">
-												CKEDITOR.replace("postAddArea", { 
-													language: "de", 
-													enterMode : CKEDITOR.ENTER_BR
-												});
-											</script>
-											<script src="./javascript/post_save.js"></script>
-										  <div class="submitPost" style="margin:30px 0;">
-											<input type="submit" value="Absenden" id="postAddSubmitBtn">
-											<input type="reset" value="Zurücksetzen" id="postAddResetBtn">
-										  </div>
-											 </form>
-											 <span id="PostAddResponse_failed" class="responseFailed">';
-									  
-									  
-									  
-									  
-									  
-									  $threadContainer .= '
-										 </span>
-										 <span id="PostAddResponse_Success" class="responseSuccess">
-										 </span>
-											 
-										 <div class="changeInformation">	
-											<p>
-											Folgendes ist bei der Erstellung eines neuen Beitrags zu beachten:
-											</p>
-											<ul>
-												<li>
-												Es sind jegliche Zeichen erlaubt.
-												</li>
-												<li>
-												Sie müssen das Urherberrecht für eingefügte Bilder besitzen. Die Administration übernimmt keine Haftung für enstandene Schäden durch Zuwiderhandlung.
-												</li>
-												<li>
-												Anstößige sowie gewaltverherrlichende oder verspottende Texte sind <b>strengstens Verboten</b>. Bei Verstoß ist mit Strafen in Form von Strafpunkten bis hin zu einer temporären oder permanenten Accountsperre zu rechnen.
-												</li>
-											</ul>
-										</div>
-											 
-										  </fieldset>
-										  </div>';
-									  
-											echo $threadContainer;
-									}
-                            }
-							else
-								throwError("Sie haben nicht die erforderlichen ZUgriffsrechte für diese Seite.");
-                        }
                         
 				if (isset($_GET['form']) && isset($_GET['threadID']) && isset($_GET['postID']) && $_GET['form'] == 'postEdit') {
 					  
@@ -810,8 +742,117 @@ if(!isset($_GET['form']) || !(isset($_GET['form']) && $_GET['form'] == 'postAdd'
 
     
 	echo $threadPageFooter;
-
 }
+
+
+	if((isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true || $main->boardConfig($main->getThreadBoardID($currentThread), "guest_posts")))
+		{
+			if((isset($_GET['form']) && $_GET['form'] != 'postEdit') || !isset($_GET['form']))
+			{
+				$content = '';
+				
+				if (isset($_GET['action']) && $_GET['action'] == 'postAdd')
+				{
+							$main->useFile('./system/controller/board_controller/board_add_reply.php');
+							
+							$content = addReply();
+				}
+
+					if (isset($_GET['form']) && $_GET['form'] == 'postAdd')
+						$class = 'post-addContainer-full';
+					else
+						$class = 'post-addContainer-fast';
+					  
+					  $threadContainer = '
+						  <a name="replyAdd"></a>
+						  <div class="'.$class.'">
+							<h1 class="fancy_font reply_add_header">
+							  Einen neuen Beitrag erstellen
+						  </h1>
+						  <fieldset class="PostAddLegend">
+							<legend>
+							  Beitrag
+							</legend>
+							<form method="POST" action="?page=Index&threadID=' . $_GET["threadID"] . '&form=postAdd&action=postAdd" class="postAddForm" id="postAddForm">';
+					  
+					  
+					  if (isset($_GET['token']) && !empty($_GET['token'])) {
+							$token = mysqli_real_escape_string($GLOBALS['connection'], $_GET['token']);
+							$query = $db->query("SELECT content FROM $db->table_post_saves WHERE token = ('" . $token . "') AND user_id = (SELECT id FROM $db->table_accounts WHERE sid=('" . $_SESSION['ID'] . "'))");
+							
+							$results = mysqli_fetch_object($query);
+								  $content = $results->content;
+					  }
+					  if (!isset($_GET['token']) && !isset($_GET['action']))
+							$content = '';
+					  
+					  $threadContainer .= '
+						<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+						  <textarea type="hidden" id="postAddArea" name="postAddArea"> 
+							' . $content . '
+						  </textarea>
+							<script>tinymce.init({ 
+								skin_url: "css/tinymce",
+								skin: "charcoal",
+								language_url : "lang/tinymce/de.js",
+								language: "de",
+								selector:"#postAddArea",
+								plugins: [
+								"autoresize advlist autolink lists link image charmap print preview hr anchor pagebreak",
+								"searchreplace wordcount visualblocks visualchars code fullscreen",
+								"insertdatetime media nonbreaking save table contextmenu directionality",
+								"emoticons template paste textcolor colorpicker textpattern imagetools codesample"
+							  ],
+								toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+								  toolbar2: "print preview media | forecolor backcolor fontsizeselect emoticons | codesample",
+								  image_advtab: true,
+								autoresize_min_height: 350,
+								autoresize_max_height: 550
+								
+							});</script>
+							<script src="./javascript/post_save.js"></script>
+						  <div class="submitPost" style="margin:30px 0;">
+							<input type="submit" value="Absenden" id="postAddSubmitBtn">
+							<input type="reset" value="Zurücksetzen" id="postAddResetBtn">
+						  </div>
+							 </form>';
+					  
+					  
+
+					  $threadContainer .= '
+						 </span>
+						 <span id="PostAddResponse_Success" class="responseSuccess">
+						 </span>
+							 
+						 <div class="changeInformation">	
+							<p>
+							Folgendes ist bei der Erstellung eines neuen Beitrags zu beachten:
+							</p>
+							<ul>
+								<li>
+								Es sind jegliche Zeichen erlaubt.
+								</li>
+								<li>
+								Sie müssen das Urherberrecht für eingefügte Bilder besitzen. Die Administration übernimmt keine Haftung für enstandene Schäden durch Zuwiderhandlung.
+								</li>
+								<li>
+								Anstößige sowie gewaltverherrlichende oder verspottende Texte sind <b>strengstens Verboten</b>. Bei Verstoß ist mit Strafen in Form von Strafpunkten bis hin zu einer temporären oder permanenten Accountsperre zu rechnen.
+								</li>
+							</ul>
+						</div>
+							 
+						  </fieldset>
+						  </div>';
+					  
+							echo $threadContainer;
+
+			}
+		}
+		else
+		{
+			if((isset($_GET['form']) && $_GET['form'] != 'postEdit'))
+				$main->throwError("Sie haben nicht die erforderlichen Zugriffsrechte für diese Seite.", "?page=Index");
+		}
             
             echo '
 	</div>

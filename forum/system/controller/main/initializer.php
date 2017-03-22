@@ -1,4 +1,5 @@
 <?php
+
 // Re initialize the DB and Runtime Class
 if (!isset($db) || $db == NULL)
 {
@@ -12,7 +13,7 @@ if (!isset($main) || $main == NULL)
 require('./system/auth/auth.php');
 
 if (isset ($_GET['action']) && $_GET['action'] == 'logout') {
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet']) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS']) {
 $main->useFile('./system/controller/sessions/logout.php');
 Logout();
 } else {

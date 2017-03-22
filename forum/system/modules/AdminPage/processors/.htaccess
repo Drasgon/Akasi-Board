@@ -1,0 +1,5 @@
+Deny from All
+
+<Files "admin_teamspeak.php">
+	Allow from All
+</Files>

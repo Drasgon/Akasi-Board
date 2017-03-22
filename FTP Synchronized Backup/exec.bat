@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\WinSCP\WinSCP.exe" /console /script="D:\Users\Ian\Documents\FTP Synchronized Backup\shared.txt"

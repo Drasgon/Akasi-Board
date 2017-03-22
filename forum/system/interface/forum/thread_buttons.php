@@ -12,13 +12,13 @@ if (!isset($db) || $db == NULL)
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 
-	if(isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true || $main->boardConfig($main->getThreadBoardID($currentThread), "guest_posts"))
+	if(isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true || $main->boardConfig($main->getThreadBoardID($currentThread), "guest_posts"))
 		{
 		$html .= '
 			<div class="largeButtons">
 				<ul>
-					<li>
-						<a href="?page=Index&amp;threadID=' . $currentThread . '&amp;form=postAdd" id="replyButton1" title="Antworten">
+					<li class="add_post_btn">
+						<a class="replyButton1 no-smoothstate" title="Antworten">
 							<img src="images/icons/threadAdd-Msg.png" alt="">
 
 							<span>
@@ -28,7 +28,7 @@ if (!isset($main) || $main == NULL)
 					</li>';
 		}
 		
-		if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true && isset($threadExists) && $threadExists == true)
+		if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true && isset($threadExists) && $threadExists == true)
 		{
 		
 		$html .= '

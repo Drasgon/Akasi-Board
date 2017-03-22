@@ -8,7 +8,7 @@ if (!isset($db) || $db == NULL)
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 	
-if(!isset($_SESSION['userAccess']) || !isset($_SESSION['modAccess']) || !isset($_SESSION['adminAccess'])) {
+if(!isset($_SESSION['USERACCESS']) || !isset($_SESSION['MODACCESS']) || !isset($_SESSION['ADMINACCESS'])) {
 
 if(isset($GLOBALS['connection'])) {
 	$connection = $GLOBALS['connection'];
@@ -21,25 +21,25 @@ while($level = mysqli_fetch_object($getLevel)) {
 
 // USER
 if($account_level == '1') {
-	$_SESSION['userAccess'] 	= true;
-	$_SESSION['modAccess'] 		= false;
-	$_SESSION['adminAccess'] 	= false;
+	$_SESSION['USERACCESS'] 	= true;
+	$_SESSION['MODACCESS'] 		= false;
+	$_SESSION['ADMINACCESS'] 	= false;
 	$_SESSION['accountLevelDisplay'] = 'User';
 }
 
 // MODERATOR
 if($account_level == '2') {
-	$_SESSION['userAccess'] 	= true;
-	$_SESSION['modAccess'] 		= true;
-	$_SESSION['adminAccess'] 	= false;
+	$_SESSION['USERACCESS'] 	= true;
+	$_SESSION['MODACCESS'] 		= true;
+	$_SESSION['ADMINACCESS'] 	= false;
 	$_SESSION['accountLevelDisplay'] = 'Moderator';
 }
 
 // ADMINISTRATOR
 if($account_level == '3') {
-	$_SESSION['userAccess'] 	= true;
-	$_SESSION['modAccess'] 		= true;
-	$_SESSION['adminAccess']	= true;
+	$_SESSION['USERACCESS'] 	= true;
+	$_SESSION['MODACCESS'] 		= true;
+	$_SESSION['ADMINACCESS']	= true;
 	$_SESSION['accountLevelDisplay'] = 'Administrator';
 }
 

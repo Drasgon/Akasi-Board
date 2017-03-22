@@ -36,11 +36,11 @@ class Chat
 			if (mysqli_num_rows($checkUserbyQuery) == 0 || mysqli_num_rows($checkUserbyQuery) > 1)
 			{
 				setcookie('PHPSESSID', '', time() - 3600);
-				$_SESSION['angemeldet'] = false;
+				$_SESSION['STATUS'] = false;
 			}
 			else
 			{
-				$_SESSION['angemeldet'] = true;
+				$_SESSION['STATUS'] = true;
 				$this->_main->useFile('./system/controller/security/permission_system.php');
 				while($ownID = mysqli_fetch_object($checkUserbyQuery))
 				{

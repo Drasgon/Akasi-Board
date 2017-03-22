@@ -46,7 +46,7 @@ $langGlobal['max_users_reached_string_first'] = 'The number of allowed active us
 $langGlobal['max_users_reached_string_sec']   = ' ) was reached or exceeded. Other logins are currently not possible. Please try again later.';
 $langGlobal['username_illegal_chars']         = 'Username contains illegal characters.';
 $langGlobal['invalid_pass_or_username']       = 'Invalid username or password';
-$langGlobal['account_not_validated']          = 'This account did not get unlocked by the administration yet.';
+$langGlobal['account_not_validated']          = 'This account was not verified yet. Check your E-Mail Inbox, or contact the Administration!';
 $langGlobal['account_ban_temp_first']         = 'This account is suspended until ';
 $langGlobal['account_ban_temp_time_first']	  = 'at ';
 $langGlobal['account_ban_temp_second']        = '.';
@@ -68,6 +68,7 @@ $langGlobal['portal_lang_new_members']		= 'New members';
 $langGlobal['portal_lang_news']				= 'News';
 $langGlobal['portal_lang_friends']			= 'Friends';
 $langGlobal['portal_lang_functions']		= 'Functions';
+$langGlobal['portal_survey_headline']		= 'Survey';
 
 $langGlobal['gallery_lang_welcome']			= 'Willkommen in der Galerie! Hier können Sie Bilder mit anderen Nutzern teilen, diese Bewerten, Kommentieren und vieles mehr!';
 

@@ -8,7 +8,7 @@ if (!isset($db) || $db == NULL)
 if (!isset($main) || $main == NULL)
     $main = new Board($db, $connection);
 
-if (isset($_SESSION['angemeldet']) && $_SESSION['angemeldet'] == true) {
+if (isset($_SESSION['STATUS']) && $_SESSION['STATUS'] == true) {
 
 $main->useFile('./system/interface/errorpage_cc.php');
 $main->useFile('./system/interface/successpage.php');

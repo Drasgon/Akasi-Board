@@ -29,56 +29,79 @@ function getUrlParameter(sParam) {
     }
 }
 
-
-$(document).ready(function() {
+function login()
+{
     var b, e, f;
-    $("#form").submit(function(a) {
+    $(document).on('submit', '#loginform', function(a) {
+	
         a.stopPropagation();
         a.preventDefault();
-        $("#response_failed").slideUp("fast", function() {
-            if ("" == $("#username").val() && "" == $("#password").val()) return $("#response_failed").html("Bitte geben sie einen Nutzernamen sowie das Passwort ein!").slideDown("fast"), !1;
-            "" == $("#username").val() && $("#response_failed").html("Bitte geben sie einen Usernamen ein!").slideDown("fast");
-            13 < $("#username").val().length && ($("#username").val(""), $("#response_failed").html("Fehlerhafte Eingaben!"));
-            "" == $("#password").val() && $("#response_failed").html("Bitte geben sie ihr Passwort ein!").slideDown("fast");
-            34 < $("#password").val().length && ($("#password").val(""), $("#response_failed").html("Fehlerhafte Eingaben!").slideDown("fast"));
-            if (34 < $("#password").val().length && 13 < $("#username").val().length) return $("#response_failed").html("Fehlerhafte Eingaben!").slideDown("fast"), !1;
-            "" != $("#username").val() && "" != $("#password").val() && 13 >= $("#username").val().length && 34 >= $("#password").val().length && (a =
+		
+		
+		$(document).off('submit');
+			
+            if ("" == $("#username").val() && "" == $("#password").val()) 
+				return $("#response_failed").html("Bitte geben sie einen Nutzernamen sowie das Passwort ein!").slideDown("fast");
+			if("" == $("#username").val())
+				$("#response_failed").html("Bitte geben sie einen Usernamen ein!").slideDown("fast");
+            if(13 < $("#username").val().length)
+				$("#username").val(""), $("#response_failed").html("Fehlerhafte Eingaben!");
+			if("" == $("#password").val())
+				$("#response_failed").html("Bitte geben sie ihr Passwort ein!").slideDown("fast");
+			if(34 < $("#password").val().length)
+				$("#password").val(""), $("#response_failed").html("Fehlerhafte Eingaben!").slideDown("fast");
+            if (34 < $("#password").val().length && 13 < $("#username").val().length)
+				return $("#response_failed").html("Fehlerhafte Eingaben!").slideDown("fast");
+			if("" != $("#username").val() && "" != $("#password").val() && 13 >= $("#username").val().length && 34 >= $("#password").val().length)
+			{
+				
+
                 $("#username").val(), $("#password").val(), $("#submit").attr("disabled", "disabled"), $("#response_failed").slideUp(350, function() {
                     $(this).html("")
-                }), b = $(".quickLogin_User").val(), e = $(".quickLogin_Pass").val(), f = $("#checkboxThreeInput").is(":checked") ? !0 : !1, $.ajax({
-					xhrFields: {
-						withCredentials: true
-					},
-                    type: "POST",
-                    data: "username=" + b + "&password=" + e + "&StayLoggedIn=" + f,
-                    cache: !1,
-                    url: "./system/controller/sessions/login.php",
-                    beforeSend: function() {
-                        $("#response_loading").append("<img src='./images/loaders/loader_large.gif' width='50' height='50' id='login_response_loader' />");
-                        $("#login_response_loader").hide().fadeIn(350);
-                        $("#username").attr("disabled", "disabled");
-                        $("#password").attr("disabled", "disabled")
-                    },
-                    success: function(a) {
-                        -1 === a.indexOf("<meta") && $("#login_response_loader").fadeOut("slow", function() {
-                            $(this).remove();
-                            $("#response_failed").append(a).slideToggle(350);
-                            $("#username").val("");
-                            $("#password").val("");
-                            $("#username").removeAttr("disabled");
-                            $("#password").removeAttr("disabled");
-                            setTimeout(function() {
-                                $("#submit").removeAttr("disabled")
-                            }, 2E3)
-                        }); if (a.indexOf("<meta") > 0)
-							{
-								$("#response_success").append(a).hide().slideToggle(350).css({"color" : "green", "margin-top" : "35px"});
-								$(".staylogin_status, .LoginOptions").fadeOut(250);
-							}
-                    }
-                }))
-        })
+                });
+					b = $(".quickLogin_User").val();
+					e = $(".quickLogin_Pass").val();
+					f = $("#checkboxThreeInput").is(":checked") ? 1 : 0,
+					
+					$.ajax({
+						xhrFields: {
+							withCredentials: true
+						},
+						type: "POST",
+						data: "username=" + b + "&password=" + e + "&StayLoggedIn=" + f,
+						cache: false,
+						url: "./system/controller/sessions/login.php",
+						beforeSend: function() {
+							$("#response_failed").slideUp("fast");
+							$("#response_loading").append("<img src='./images/loaders/loader_large.gif' width='50' height='50' class='login_response_loader' />");
+							$(".login_response_loader").hide().fadeIn(350);
+							$("#username").attr("disabled", "disabled");
+							$("#password").attr("disabled", "disabled");
+						},
+						success: function(a) {
+							-1 === a.indexOf("<meta") && $(".login_response_loader").fadeOut("slow", function() {
+								$(".login_response_loader").remove();
+								$("#response_failed").html("").append(a).slideDown(350);
+								$("#username").val("");
+								$("#password").val("");
+								$("#username").removeAttr("disabled");
+								$("#password").removeAttr("disabled");
+								setTimeout(function() {
+									$("#submit").removeAttr("disabled")
+								}, 4E3)
+							}); if (a.indexOf("<meta") > 0)
+								{
+									$("#response_success").append(a).hide().slideToggle(350).css({"color" : "green", "margin-top" : "35px"});
+									$(".staylogin_status, .LoginOptions").fadeOut(250);
+								}
+						}
+					});
+			}
     });
+}
+
+function boardCategoryToggle()
+{
     var d = 1;
     setInterval(function() {
         ++d
@@ -184,6 +207,10 @@ $(document).ready(function() {
             }))
         }
     });
+}
+	
+function galleryPageSwitch()
+{
     $(".galleryPages a").click(function(a) {
         a.stopPropagation();
         a.preventDefault();
@@ -213,7 +240,10 @@ $(document).ready(function() {
             }
         })
     })
+}
 
+function galleryInformationSelect()
+{
     $("#imageInformation select").change(function() {
         var obj = $(this);
         var type = $(this).attr("id");
@@ -237,7 +267,9 @@ $(document).ready(function() {
         });
 
     });
-});
+}
+
+	
 var passes = 0;
 
 function resetUploadProcess() {

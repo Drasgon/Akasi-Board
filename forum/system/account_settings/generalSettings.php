@@ -170,13 +170,13 @@ $accSettingsContainer .= '
 <div class="accSettings_radioalign">
 	<input '.$ajaxMsg1.' type="radio" name="changeGeneralSettings_ajaxMsg" value="1" id="subscription_notes_1">
 	<label for="subscription_notes_1">
-		Aktiviert ( Standard )
+		Aktiviert
 	</label>
 </div>
 <div class="accSettings_radioalign">
 	<input '.$ajaxMsg2.' type="radio" name="changeGeneralSettings_ajaxMsg" value="2" id="subscription_notes_2">
 	<label for="subscription_notes_2">
-		Deaktiviert
+		Deaktiviert ( Standard )
 	</label>
 </div>';
 
@@ -214,8 +214,8 @@ while($actualTemplate = mysqli_fetch_object($getActualTemplate)) {
 	$lang 	  = $actualTemplate->language;
 }
 
-$val_max = 2;
-$default_template = 2;
+$val_max = 3;
+$default_template = $main->serverConfig('default_css_template');
 
 $accSettingsContainer .= '<div class="html_dropdown">Design: <select name="css_template" class="css_template_main">';
 
@@ -230,6 +230,9 @@ switch($i) {
 	break;
 	case 2:
 		$layout_name = 'Bane of the Legion';
+	break;
+	case 3:
+		$layout_name = 'Widescreen Test';
 	break;
 	default:
 		$layout_name = 'Akasi Board';

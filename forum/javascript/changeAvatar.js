@@ -1,4 +1,10 @@
 
+		// var rgba_pattern = "%r,%g,%b,%a";
+	var r = $('#r').val();
+	var g = $('#g').val();
+	var b = $('#b').val();
+	var a = $('#a').val()/100;
+	var val_string = 'solid 5px rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
 
 
 	function initializeChange(data)
@@ -8,6 +14,21 @@
             $(".cropit-image-preview").css("background-image", c.target.result)
         };
         c.readAsDataURL(data.files[0]);			
+	}
+	
+	
+	function changeBorder()
+	{
+		r = $('#r').val();
+		g = $('#g').val();
+		b = $('#b').val();
+		a = $('#a').val()/100;
+		
+		val_string = 'solid 5px rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+		
+		console.log(val_string);
+		
+		$('#avatar_preview').css("border", val_string);
 	}
 	
 	
@@ -34,3 +55,9 @@
 			  $('#file').val('');
 			});
       });
+	  
+$(document).ready(function() {
+	$('input[type=range]').on('input', function () {
+    $(this).trigger('change');
+});
+});
